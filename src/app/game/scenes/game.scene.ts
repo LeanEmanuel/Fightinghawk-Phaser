@@ -83,6 +83,25 @@ export class GameScene extends Phaser.Scene {
       strokeThickness: 3
     });
 
+    // Nombre jugador
+    const playerName = localStorage.getItem('playerName') || 'Player';
+    this.add.text(this.scale.width / 2, 16, playerName, {
+      fontSize: '28px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+
+    // Level
+    this.add.text(this.scale.width - 20, 16, 'Level 1', {
+      fontSize: '20px',
+      color: '#00ffcc',
+      fontFamily: 'Arial',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(1, 0);
+
   }
 
 
