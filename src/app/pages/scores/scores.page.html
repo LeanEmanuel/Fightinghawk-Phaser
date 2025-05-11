@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Scores</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-item *ngFor="let item of scoreList">
+      <ion-label>
+        <h2>{{ item.name }}</h2>
+        <p>{{ item.score }} scores</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

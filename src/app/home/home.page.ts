@@ -6,7 +6,7 @@ import {
   IonHeader,
   IonInput,
   IonItem,
-  IonLabel,
+  IonLabel, IonRouterLink,
   IonTitle,
   IonToolbar
 } from "@ionic/angular/standalone";
@@ -25,7 +25,8 @@ import {FormsModule} from "@angular/forms";
     IonLabel,
     IonInput,
     FormsModule,
-    IonButton
+    IonButton,
+    IonRouterLink
   ]
 })
 export class HomePage {

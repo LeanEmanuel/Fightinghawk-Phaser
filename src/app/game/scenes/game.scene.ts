@@ -66,6 +66,8 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
 
+    this.physics.add.overlap(this.enemies, this.airplane, this.handlePlayerHit, undefined, this);
+
     // Animación explosión
     this.anims.create({
       key: 'explode',
@@ -189,6 +191,28 @@ export class GameScene extends Phaser.Scene {
       this.bestScore = this.score;
       localStorage.setItem(`highscore_${this.playerName}`, this.bestScore.toString());
     }
-
   }
+
+  private handlePlayerHit(player: Phaser.GameObjects.GameObject, enemy: Phaser.GameObjects.GameObject): void {
+    const p = player as Phaser.Physics.Arcade.Sprite;
+    const e = enemy as Phaser.Physics.Arcade.Image;
+
+    // Destruir enemigo
+    e.destroy();
+
+    // Reproducir explosión en la posición del jugador
+    const explosion = this.add.sprite(p.x, p.y, 'explosion1');
+    explosion.setScale(0.4);
+    explosion.play('explode');
+
+    // Desactivar jugador
+    p.setVisible(false);
+    p.disableBody(true, true);
+
+    // Detener el juego tras un momento
+    this.time.delayedCall(1000, () => {
+      this.scene.start('GameOverScene', { score: this.score });
+    });
+  }
+  
 }
