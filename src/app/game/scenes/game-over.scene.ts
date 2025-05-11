@@ -56,14 +56,6 @@ export class GameOverScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive();
 
-    // Efecto hover
-    restartText.on("pointerover", () => {
-      restartText.setStyle({ backgroundColor: "#b742f3" })
-    });
-
-    restartText.on("pointerout", () => {
-      restartText.setStyle({ backgroundColor: "#aa00ff" })
-    });
 
     restartText.on("pointerdown", () => {
       this.scene.start("GameScene")
@@ -80,15 +72,6 @@ export class GameOverScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setInteractive();
-
-    // Efecto hover
-    menuText.on("pointerover", () => {
-      menuText.setStyle({ backgroundColor: "#ff33dd" })
-    });
-
-    menuText.on("pointerout", () => {
-      menuText.setStyle({ backgroundColor: "#ff00cc" })
-    });
 
     menuText.on("pointerdown", () => {
       window.location.href = "/home"

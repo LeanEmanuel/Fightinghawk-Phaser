@@ -17,6 +17,9 @@ export class GameScene extends Phaser.Scene {
 
   private score: number = 0;
   private scoreText!: Phaser.GameObjects.Text;
+  private highScoreText!: Phaser.GameObjects.Text;
+  private playerNameText!: Phaser.GameObjects.Text;
+  private levelText!: Phaser.GameObjects.Text;
   private bestScore: number = 0;
   private playerName: string = '';
 
@@ -83,10 +86,15 @@ export class GameScene extends Phaser.Scene {
     this.resumeKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     // Lista de vidas
+    this.lives = 3;
+    this.lifeIcons.forEach(icon => icon.destroy());
+    this.lifeIcons = [];
+
     for (let i = 0; i < this.lives; i++) {
       const heart = this.add.image(this.scale.width - 20 - i * 30, 50, 'heart')
         .setScale(0.05)
-        .setScrollFactor(0);
+        .setScrollFactor(0)
+        .setDepth(10);
       this.lifeIcons.push(heart);
     }
 
@@ -135,7 +143,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     //High score
-    this.add.text(16, 44, `HIGH SCORE: ${this.bestScore}`, {
+    this.highScoreText = this.add.text(16, 44, `HIGH SCORE: ${this.bestScore}`, {
       fontSize: "14px",
       color: "#ffcc00",
       fontFamily: "Orbitron, Arial, sans-serif",
@@ -148,8 +156,7 @@ export class GameScene extends Phaser.Scene {
     this.playerName = localStorage.getItem('playerName') || 'Player';
     this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
 
-    this.add
-      .text(this.scale.width / 2, 32, playerName.toUpperCase(), {
+    this.playerNameText = this.add.text(this.scale.width / 2, 32, playerName.toUpperCase(), {
         fontSize: "20px",
         color: "#ffffff",
         fontFamily: "Orbitron, Arial, sans-serif",
@@ -159,8 +166,7 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     // Level
-    this.add
-      .text(this.scale.width - 20, 16, "LEVEL 1", {
+    this.levelText = this.add.text(this.scale.width - 20, 16, "LEVEL 1", {
         fontSize: "20px",
         color: "#aa00ff",
         fontFamily: "Orbitron, Arial, sans-serif",
@@ -230,11 +236,19 @@ export class GameScene extends Phaser.Scene {
       window.location.href = "/home"
     });
 
-    this.children.bringToTop(this.scoreText);
-    this.children.bringToTop(this.pauseText);
-    this.children.bringToTop(this.resumeButton);
-    this.children.bringToTop(this.exitButton);
-    this.lifeIcons.forEach(icon => this.children.bringToTop(icon));
+    this.scoreText.setDepth(10);
+    this.highScoreText.setDepth(10);
+    this.playerNameText.setDepth(10);
+    this.levelText.setDepth(10);
+    this.lifeIcons.forEach(icon => icon.setDepth(10));
+
+    this.add.text(10, this.scale.height - 30, 'Press P to pause', {
+      fontSize: '12px',
+      color: '#ffffff',
+      fontFamily: 'Orbitron, Arial, sans-serif',
+      stroke: '#000000',
+      strokeThickness: 2,
+    });
   }
 
   override update(): void {
@@ -323,6 +337,7 @@ export class GameScene extends Phaser.Scene {
       bullet.setVisible(true);
       bullet.setVelocityY(200);
       bullet.setScale(0.4);
+      bullet.setAngle(90);
     }
   }
 
