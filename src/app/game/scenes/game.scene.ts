@@ -5,6 +5,9 @@ export class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private spaceKey!: Phaser.Input.Keyboard.Key;
 
+  private background1!: Phaser.GameObjects.TileSprite;
+  private background2!: Phaser.GameObjects.TileSprite;
+
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemies!: Phaser.Physics.Arcade.Group;
 
@@ -40,10 +43,24 @@ export class GameScene extends Phaser.Scene {
     for (let i = 1; i <= 10; i++) {
       this.load.image(`explosion${i}`, `assets/sprites/explosion/Explosion_${i}.png`);
     }
+
+    // background
+    this.load.image('background_star', 'assets/backgrounds/stars_small_1.png');
+    this.load.image('background_nebula', 'assets/backgrounds/nebula_blue.png');
   }
 
 
   create(): void {
+
+    this.background1 = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background_nebula')
+      .setOrigin(0, 0)
+      .setScrollFactor(0);
+
+    this.background2 = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background_star')
+      .setOrigin(0, 0)
+      .setScrollFactor(0);
+
+
 
     this.airplane = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'airplanes', 0);
     this.airplane.setCollideWorldBounds(true);
@@ -181,6 +198,13 @@ export class GameScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
       this.shootBullet();
     }
+
+    // Background
+    if (!this.paused) {
+      this.background1.tilePositionY -= 0.5; // rápido
+      this.background2.tilePositionY -= 0.05; // lento
+    }
+
   }
 
   private shootBullet(): void {
@@ -205,7 +229,7 @@ export class GameScene extends Phaser.Scene {
 
     const enemy = this.enemies.create(x, -50, sprite) as Phaser.Physics.Arcade.Image;
     // Velocidad hacia abajo aleatoria
-    enemy.setVelocityY(Phaser.Math.Between(80, 120));
+    enemy.setVelocityY(Phaser.Math.Between(100, 150));
 
     // Escala proporcional
     enemy.setScale(0.25);

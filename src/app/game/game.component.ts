@@ -10,8 +10,6 @@ import { GameOverScene } from './scenes/game-over.scene';
 })
 export class GameComponent implements OnInit {
 
-
-
   constructor() {
   }
 
