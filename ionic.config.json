@@ -1,0 +1,7 @@
+{
+  "name": "Fightinghawk",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
