@@ -11,6 +11,8 @@ export class GameScene extends Phaser.Scene {
 
   private score: number = 0;
   private scoreText!: Phaser.GameObjects.Text;
+  private bestScore: number = 0;
+  private playerName: string = '';
 
   constructor() {
     super({ key: 'GameScene' });
@@ -55,7 +57,7 @@ export class GameScene extends Phaser.Scene {
     // Grupo de enemigos
     this.enemies = this.physics.add.group();
     this.time.addEvent({
-      delay: 3000, // cada 3 segundo
+      delay: 2000, // cada X segundo spawn enemigos
       callback: this.spawnEnemy,
       callbackScope: this,
       loop: true
@@ -75,23 +77,35 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Texto scores
-    this.scoreText = this.add.text(16, 16, 'Puntos: 0', {
-      fontSize: '24px',
+    this.scoreText = this.add.text(16, 16, 'Score: 0', {
+      fontSize: '20px',
       color: '#ffffff',
       fontFamily: 'Arial',
       stroke: '#000000',
       strokeThickness: 3
     });
 
+    //High score
+    this.add.text(16, 44, `High Score: ${this.bestScore}`, {
+      fontSize: '18px',
+      color: '#ffcc00',
+      fontFamily: 'Arial',
+      stroke: '#000000',
+      strokeThickness: 2
+    });
+
     // Nombre jugador
     const playerName = localStorage.getItem('playerName') || 'Player';
-    this.add.text(this.scale.width / 2, 16, playerName, {
-      fontSize: '28px',
+    this.add.text(this.scale.width / 2, 32, playerName, {
+      fontSize: '20px',
       color: '#ffffff',
       fontFamily: 'Arial',
       stroke: '#000000',
       strokeThickness: 3
     }).setOrigin(0.5);
+
+    this.playerName = localStorage.getItem('playerName') || 'Player';
+    this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
 
     // Level
     this.add.text(this.scale.width - 20, 16, 'Level 1', {
@@ -103,8 +117,6 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(1, 0);
 
   }
-
-
 
   override update(): void {
     this.airplane.setVelocityX(0);
@@ -171,7 +183,12 @@ export class GameScene extends Phaser.Scene {
     // Aumentar puntuación y actualizar texto
     this.score += 1;
     this.scoreText.setText('Score: ' + this.score);
+
+    // Actualizar récord si se supera
+    if (this.score > this.bestScore) {
+      this.bestScore = this.score;
+      localStorage.setItem(`highscore_${this.playerName}`, this.bestScore.toString());
+    }
+
   }
-
-
 }
