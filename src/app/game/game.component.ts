@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import { GameScene } from './scenes/game.scene';
 
 @Component({
-  selector: 'app-game',
+  selector: 'app-phaser-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
