@@ -24,7 +24,15 @@ export class GameScene extends Phaser.Scene {
     // Imagenes naves enemigas
     this.load.image('enemy1', 'assets/sprites/ship2.png');
     this.load.image('enemy2', 'assets/sprites/ship2b.png');
+
+    //Imagenes explosión
+    for (let i = 1; i <= 10; i++) {
+      this.load.image(`explosion${i}`, `assets/sprites/explosion/Explosion_${i}.png`);
+    }
+
   }
+
+
 
   create(): void {
 
@@ -48,6 +56,19 @@ export class GameScene extends Phaser.Scene {
       callback: this.spawnEnemy,
       callbackScope: this,
       loop: true
+    });
+
+
+    this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
+
+    // Animación explosión
+    this.anims.create({
+      key: 'explode',
+      frames: Array.from({ length: 10 }, (_, i) => ({
+        key: `explosion${i + 1}`
+      })),
+      frameRate: 20,
+      hideOnComplete: true
     });
 
   }
@@ -103,5 +124,19 @@ export class GameScene extends Phaser.Scene {
     enemy.setScale(0.25);
 
   }
+
+  private destroyEnemy(bullet: any, enemy: any): void {
+    const b = bullet as Phaser.GameObjects.Sprite;
+    const e = enemy as Phaser.GameObjects.Sprite;
+
+    b.destroy();
+
+    const explosion = this.add.sprite(e.x, e.y, 'explosion1');
+    explosion.setScale(0.25);
+    explosion.play('explode');
+
+    e.destroy();
+  }
+
 
 }
