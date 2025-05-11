@@ -14,8 +14,13 @@ export class GameScene extends Phaser.Scene {
   private bestScore: number = 0;
   private playerName: string = '';
 
+  private pauseKey!: Phaser.Input.Keyboard.Key;
+  private resumeKey!: Phaser.Input.Keyboard.Key;
+  private paused: boolean = false;
+  private pauseText!: Phaser.GameObjects.Text;
+
   constructor() {
-    super({ key: 'GameScene' });
+    super({key: 'GameScene'});
   }
 
   preload(): void {
@@ -38,7 +43,6 @@ export class GameScene extends Phaser.Scene {
   }
 
 
-
   create(): void {
 
     this.airplane = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'airplanes', 0);
@@ -47,6 +51,8 @@ export class GameScene extends Phaser.Scene {
     // Input de teclado
     this.cursors = this.input!.keyboard!.createCursorKeys();
     this.spaceKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.pauseKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    this.resumeKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     // Grupo de balas
     this.bullets = this.physics.add.group({
@@ -71,7 +77,7 @@ export class GameScene extends Phaser.Scene {
     // Animación explosión
     this.anims.create({
       key: 'explode',
-      frames: Array.from({ length: 10 }, (_, i) => ({
+      frames: Array.from({length: 10}, (_, i) => ({
         key: `explosion${i + 1}`
       })),
       frameRate: 20,
@@ -118,9 +124,38 @@ export class GameScene extends Phaser.Scene {
       strokeThickness: 2
     }).setOrigin(1, 0);
 
+    // Texto que aparece al pausar
+    this.pauseText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'PAUSE', {
+      fontSize: '48px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      stroke: '#000000',
+      strokeThickness: 4
+    }).setOrigin(0.5);
+    this.pauseText.setVisible(false);
+
   }
 
+
   override update(): void {
+
+    // Pausar
+    if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+      this.physics.world.pause();
+      this.paused = true;
+      this.pauseText.setVisible(true);
+    }
+
+    // Reanudar
+    if (Phaser.Input.Keyboard.JustDown(this.resumeKey)) {
+      this.physics.world.resume();
+      this.paused = false;
+      this.pauseText.setVisible(false);
+    }
+
+    // Si está pausado, no ejecutar más lógica
+    if (this.paused) return;
+
     this.airplane.setVelocityX(0);
 
     if (this.cursors.left.isDown) {
@@ -129,8 +164,7 @@ export class GameScene extends Phaser.Scene {
     } else if (this.cursors.right.isDown) {
       this.airplane.setVelocityX(200);
       this.airplane.setFrame(4) // derecha
-    }
-    else {
+    } else {
       this.airplane.setFrame(2); // centro
     }
 
@@ -211,7 +245,7 @@ export class GameScene extends Phaser.Scene {
 
     // Transición a Game Over
     this.time.delayedCall(1000, () => {
-      this.scene.start('GameOverScene', { score: this.score });
+      this.scene.start('GameOverScene', {score: this.score});
     });
   }
 

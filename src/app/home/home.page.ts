@@ -26,7 +26,6 @@ import {FormsModule} from "@angular/forms";
     IonInput,
     FormsModule,
     IonButton,
-    IonRouterLink
   ]
 })
 export class HomePage {
