@@ -6,11 +6,12 @@ import {
   IonHeader,
   IonInput,
   IonItem,
-  IonLabel, IonRouterLink,
+  IonLabel,
   IonTitle,
   IonToolbar
 } from "@ionic/angular/standalone";
 import {FormsModule} from "@angular/forms";
+import {NgOptimizedImage} from "@angular/common";
 
 @Component({
   selector: 'app-home',
@@ -26,6 +27,7 @@ import {FormsModule} from "@angular/forms";
     IonInput,
     FormsModule,
     IonButton,
+    NgOptimizedImage,
   ]
 })
 export class HomePage {
