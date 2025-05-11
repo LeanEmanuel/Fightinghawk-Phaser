@@ -1,19 +1,27 @@
 import Phaser from "phaser";
 
+/**
+ * Scene displayed when the game ends.
+ * Shows the final score and offers options to retry or return to the home screen.
+ */
 export class GameOverScene extends Phaser.Scene {
   constructor() {
     super({ key: "GameOverScene" });
   }
 
+  /**
+   * Initializes and displays the Game Over screen.
+   * @param data - Contains the final score passed from the game scene.
+   */
   create(data: { score: number }) {
     const { width, height } = this.scale;
 
-    // Fondo
+    // Background layers (parallax style)
     this.add.tileSprite(0, 0, width, height, "background_nebula").setOrigin(0, 0).setScrollFactor(0);
 
     this.add.tileSprite(0, 0, width, height, "background_star").setOrigin(0, 0).setScrollFactor(0);
 
-    // Texto principal con estilo neón
+    // Main "Game Over"
     const gameOverText = this.add
       .text(width / 2, height / 2 - 100, "GAME OVER", {
         fontSize: "48px",
@@ -24,7 +32,6 @@ export class GameOverScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Efecto de brillo para el texto
     this.tweens.add({
       targets: gameOverText,
       alpha: { from: 0.8, to: 1 },
@@ -33,7 +40,7 @@ export class GameOverScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    // Mostrar puntuación final con estilo arcade
+    // Display final score
     this.add
       .text(width / 2, height / 2 - 20, `SCORE: ${data.score}`, {
         fontSize: "32px",
@@ -44,7 +51,7 @@ export class GameOverScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Botón "Reintentar" con estilo arcade
+    // Retry button to restart the game
     const restartText = this.add
       .text(width / 2, height / 2 + 60, "RETRY", {
         fontSize: "18px",
@@ -61,7 +68,7 @@ export class GameOverScene extends Phaser.Scene {
       this.scene.start("GameScene")
     });
 
-    // Botón "Menú" con estilo arcade
+    // Home button to go back to the main menu
     const menuText = this.add
       .text(width / 2, height / 2 + 130, "HOME", {
         fontSize: "18px",

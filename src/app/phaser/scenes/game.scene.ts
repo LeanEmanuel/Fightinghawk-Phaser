@@ -1,20 +1,39 @@
 import Phaser from 'phaser';
 
+/**
+ * GameScene handles the core gameplay loop, UI elements, player control, enemy behavior,
+ * and pause management for the arcade-style shooter.
+ */
 export class GameScene extends Phaser.Scene {
+  /** Player's spaceship sprite */
   private airplane!: Phaser.Physics.Arcade.Sprite;
+
+  /** Remaining lives (hearts) */
   private lives: number = 3;
+
+  /** Heart icons displayed on the screen */
   private lifeIcons: Phaser.GameObjects.Image[] = [];
 
+  /** Input controls */
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private spaceKey!: Phaser.Input.Keyboard.Key;
+  private pauseKey!: Phaser.Input.Keyboard.Key;
+  private resumeKey!: Phaser.Input.Keyboard.Key;
 
+  /** Scrolling background layers */
   private background1!: Phaser.GameObjects.TileSprite;
   private background2!: Phaser.GameObjects.TileSprite;
 
+  /** Player bullets group */
   private bullets!: Phaser.Physics.Arcade.Group;
+
+  /** Enemies group */
   private enemies!: Phaser.Physics.Arcade.Group;
+
+  /** Enemy bullets group */
   private enemyBullets!: Phaser.Physics.Arcade.Group;
 
+  /** Score and UI */
   private score: number = 0;
   private scoreText!: Phaser.GameObjects.Text;
   private highScoreText!: Phaser.GameObjects.Text;
@@ -23,8 +42,7 @@ export class GameScene extends Phaser.Scene {
   private bestScore: number = 0;
   private playerName: string = '';
 
-  private pauseKey!: Phaser.Input.Keyboard.Key;
-  private resumeKey!: Phaser.Input.Keyboard.Key;
+  /** Pause system */
   private paused: boolean = false;
   private pauseText!: Phaser.GameObjects.Text;
   private resumeButton!: Phaser.GameObjects.Text;
@@ -35,38 +53,45 @@ export class GameScene extends Phaser.Scene {
     super({key: 'GameScene'});
   }
 
+  /**
+   * Loads all game assets before the scene starts.
+   */
   preload(): void {
     this.load.spritesheet('airplanes', 'assets/sprites/jet_01.png', {
       frameWidth: 64,
       frameHeight: 64,
     });
 
-    // Vidas
+    // Image HP
     this.load.image('heart', 'assets/sprites/hp.png');
 
-    //Balas
+    // Bullet
     this.load.image('bullet', 'assets/sprites/bullet_01_32x32.png');
 
-    // Balas enemigas
+    // Bullet enemies
     this.load.image('enemyBullet', 'assets/sprites/enemy_bullet.png');
 
-    // Imagenes naves enemigas
+    // Images of enemy ships
     this.load.image('enemy1', 'assets/sprites/ship2.png');
     this.load.image('enemy2', 'assets/sprites/ship2b.png');
 
-    //Imagenes explosión
+    // Explosion images
     for (let i = 1; i <= 10; i++) {
       this.load.image(`explosion${i}`, `assets/sprites/explosion/Explosion_${i}.png`);
     }
 
-    // background
+    // Background
     this.load.image('background_star', 'assets/backgrounds/stars_small_1.png');
     this.load.image('background_nebula', 'assets/backgrounds/nebula_blue.png');
   }
 
 
+  /**
+   * Initializes game objects, UI, and input logic.
+   */
   create(): void {
 
+    // Background layers
     this.background1 = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background_nebula')
       .setOrigin(0, 0)
       .setScrollFactor(0);
@@ -75,17 +100,18 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
+    // Player airplane setup
     this.airplane = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'airplanes', 0);
     this.airplane.setCollideWorldBounds(true);
     this.airplane.setScale(1.2);
 
-    // Input de teclado
+    // Input keys
     this.cursors = this.input!.keyboard!.createCursorKeys();
     this.spaceKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.pauseKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
     this.resumeKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-    // Lista de vidas
+    // Lives and heart icons
     this.lives = 3;
     this.lifeIcons.forEach(icon => icon.destroy());
     this.lifeIcons = [];
@@ -98,13 +124,13 @@ export class GameScene extends Phaser.Scene {
       this.lifeIcons.push(heart);
     }
 
-    // Grupo de balas
+    // Group of bullets
     this.bullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
       runChildUpdate: true
     });
 
-    // Grupo de enemigos
+    // Group of enemies
     this.enemies = this.physics.add.group();
     this.time.addEvent({
       delay: 2000, // cada X segundo spawn enemigos
@@ -113,12 +139,13 @@ export class GameScene extends Phaser.Scene {
       loop: true
     });
 
+    // Group enemies bullets
     this.enemyBullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
       runChildUpdate: true
     });
 
-
+    // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
     this.physics.add.overlap(this.enemies, this.airplane, this.handlePlayerHit, undefined, this);
     this.physics.add.overlap(this.enemyBullets, this.airplane, this.playerHitByBullet, undefined, this);
@@ -151,7 +178,7 @@ export class GameScene extends Phaser.Scene {
       strokeThickness: 1,
     });
 
-    // Nombre jugador
+    // Player name
     const playerName = localStorage.getItem('playerName') || 'Player';
     this.playerName = localStorage.getItem('playerName') || 'Player';
     this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
@@ -188,7 +215,7 @@ export class GameScene extends Phaser.Scene {
     ).setOrigin(0.5);
     this.pausePanel.setVisible(false);
 
-    // Texto que aparece al pausar
+    // Pause
     this.pauseText = this.add
       .text(centerX, centerY - 60, "PAUSED", {
         fontSize: "40px",
@@ -200,7 +227,7 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5)
     this.pauseText.setVisible(false);
 
-    // Botón de reanudar
+    // Button resume
     this.resumeButton = this.add
       .text(centerX, centerY - 10, "Resume", {
         fontSize: "20px",
@@ -219,6 +246,7 @@ export class GameScene extends Phaser.Scene {
       this.resumeGame()
     });
 
+    // Button Exit
     this.exitButton = this.add
       .text(centerX, centerY + 50, "Exit", {
         fontSize: "20px",
@@ -236,6 +264,7 @@ export class GameScene extends Phaser.Scene {
       window.location.href = "/home"
     });
 
+    // Depth adjustment for HUD
     this.scoreText.setDepth(10);
     this.highScoreText.setDepth(10);
     this.playerNameText.setDepth(10);
@@ -251,6 +280,9 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Main game loop, handles movement, shooting, and background scroll.
+   */
   override update(): void {
 
     // Pausar
@@ -271,6 +303,7 @@ export class GameScene extends Phaser.Scene {
 
     this.airplane.setVelocityX(0);
 
+    // Movement control
     if (this.cursors.left.isDown) {
       this.airplane.setVelocityX(-200);
       this.airplane.setFrame(0);// izquierda
@@ -281,7 +314,7 @@ export class GameScene extends Phaser.Scene {
       this.airplane.setFrame(2); // centro
     }
 
-    // Disparo
+    // Fire
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
       this.shootBullet();
     }
@@ -294,6 +327,9 @@ export class GameScene extends Phaser.Scene {
 
   }
 
+  /**
+   * Creates and fires a bullet from the player's current position.
+   */
   private shootBullet(): void {
     const bullet = this.bullets.get(
       this.airplane.x,
@@ -310,6 +346,9 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Spawns a single enemy and sets up its behavior and shooting.
+   */
   private spawnEnemy(): void {
     const x = Phaser.Math.Between(50, this.scale.width - 50);
     const sprite = Phaser.Math.Between(0, 1) === 0 ? 'enemy1' : 'enemy2';
@@ -328,6 +367,10 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Spawns a bullet from a given enemy's position.
+   * @param enemy - The enemy that is shooting.
+   */
   private enemyShoot(enemy: Phaser.Physics.Arcade.Image): void {
     if (!enemy.active || this.paused) return;
 
@@ -341,6 +384,11 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Destroys an enemy on collision with a bullet and updates score.
+   * @param bullet - Bullet that hit the enemy.
+   * @param enemy - Enemy being destroyed.
+   */
   private destroyEnemy(bullet: any, enemy: any): void {
     const b = bullet as Phaser.GameObjects.Sprite;
     const e = enemy as Phaser.GameObjects.Sprite;
@@ -353,17 +401,22 @@ export class GameScene extends Phaser.Scene {
 
     e.destroy();
 
-    // Aumentar puntuación y actualizar texto
+    // Increase punctuation and update text
     this.score += 1;
     this.scoreText.setText('Score: ' + this.score);
 
-    // Actualizar récord si se supera
+    // Update record if exceeded
     if (this.score > this.bestScore) {
       this.bestScore = this.score;
       localStorage.setItem(`highscore_${this.playerName}`, this.bestScore.toString());
     }
   }
 
+  /**
+   * Handles collision between the player and an enemy or bullet, triggering game over.
+   * @param player - The player's ship.
+   * @param enemy - The enemy (optional).
+   */
   private handlePlayerHit(player: any, enemy: any): void {
     const p = player as Phaser.Physics.Arcade.Sprite;
 
@@ -372,21 +425,26 @@ export class GameScene extends Phaser.Scene {
       e.destroy();
     }
 
-    // Reproducir explosión en la posición del jugador
+    // Play explosion at player's position
     const explosion = this.add.sprite(p.x, p.y, 'explosion1');
     explosion.setScale(0.4);
     explosion.play('explode');
 
-    // Desactivar jugador
+    // Deactivate player
     p.setVisible(false);
     p.disableBody(true, true);
 
-    // Transición a Game Over
+    // Transition to Game Over
     this.time.delayedCall(1000, () => {
       this.scene.start('GameOverScene', {score: this.score});
     });
   }
 
+  /**
+   * Reduces player's life by one and removes a heart icon.
+   * @param player - The player's ship.
+   * @param bullet - Bullet that hit the player.
+   */
   private playerHitByBullet(player: any, bullet: any): void {
     bullet.destroy();
     this.lives--;
@@ -399,6 +457,9 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Resumes the game from paused state.
+   */
   private resumeGame(): void {
     this.physics.world.resume();
     this.paused = false;
@@ -407,5 +468,4 @@ export class GameScene extends Phaser.Scene {
     this.exitButton.setVisible(false);
     this.pausePanel.setVisible(false);
   }
-
 }

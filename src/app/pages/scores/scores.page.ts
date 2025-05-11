@@ -17,14 +17,26 @@ import {Router} from "@angular/router";
   ],
   standalone: true
 })
+
+/**
+ * This component displays the top scores stored in localStorage.
+ * It reads all entries starting with "highscore_", extracts player names and scores,
+ * sorts them in descending order, and presents them in a list.
+ */
 export class ScoresPage implements OnInit {
+
   constructor(private router: Router) {}
+
+  /** List of players and their scores, to be displayed in the view */
   public scoreList: { name: string, score: number }[] = [];
 
+  /**
+   * OnInit lifecycle hook: populates the score list from localStorage
+   */
   ngOnInit() {
     this.scoreList = [];
 
-    // Recorremos localStorage
+    // Iterate through localStorage keys
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('highscore_')) {
@@ -34,10 +46,13 @@ export class ScoresPage implements OnInit {
       }
     }
 
-    // Ordenar de mayor a menor
+    // Sort scores in descending order
     this.scoreList.sort((a, b) => b.score - a.score);
   }
 
+  /**
+   * Navigates back to the home screen
+   */
   goToHome() {
     this.router.navigateByUrl('/home');
   }

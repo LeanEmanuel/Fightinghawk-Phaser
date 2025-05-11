@@ -13,6 +13,9 @@ export class GameComponent implements OnInit {
   constructor() {
   }
 
+  /**
+   * Initializes the Phaser game engine when the component mounts.
+   */
   ngOnInit() {
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
@@ -29,5 +32,6 @@ export class GameComponent implements OnInit {
       },
     };
 
+    // Initializes the Phaser game with the specified configuration
     const game = new Phaser.Game(config);}
 }

@@ -9,6 +9,10 @@ import {
 } from "@ionic/angular/standalone";
 import {FormsModule} from "@angular/forms";
 
+/**
+ * HomePage component represents the main menu of the game.
+ * It allows the user to enter their name, start the game or view high scores.
+ */
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -23,15 +27,22 @@ import {FormsModule} from "@angular/forms";
   ]
 })
 export class HomePage {
+  // Stores the name entered by the player
   playerName: string = '';
 
   constructor(private router: Router) {}
 
+  /**
+   * Stores the player name in localStorage and navigates to the game scene.
+   */
   startGame() {
     localStorage.setItem('playerName', this.playerName.trim());
     this.router.navigateByUrl('/game');
   }
 
+  /**
+   * Navigates to the high scores page.
+   */
   goToScores() {
     this.router.navigateByUrl('/scores');
   }
