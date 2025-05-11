@@ -6,7 +6,6 @@ export class GameScene extends Phaser.Scene {
   private spaceKey!: Phaser.Input.Keyboard.Key;
 
   private bullets!: Phaser.Physics.Arcade.Group;
-
   private enemies!: Phaser.Physics.Arcade.Group;
 
   private score: number = 0;
@@ -18,6 +17,7 @@ export class GameScene extends Phaser.Scene {
   private resumeKey!: Phaser.Input.Keyboard.Key;
   private paused: boolean = false;
   private pauseText!: Phaser.GameObjects.Text;
+  private resumeButton!: Phaser.GameObjects.Text;
 
   constructor() {
     super({key: 'GameScene'});
@@ -29,6 +29,7 @@ export class GameScene extends Phaser.Scene {
       frameHeight: 64,
     });
 
+    //Balas
     this.load.image('bullet', 'assets/sprites/bullet_01_32x32.png');
 
     // Imagenes naves enemigas
@@ -39,7 +40,6 @@ export class GameScene extends Phaser.Scene {
     for (let i = 1; i <= 10; i++) {
       this.load.image(`explosion${i}`, `assets/sprites/explosion/Explosion_${i}.png`);
     }
-
   }
 
 
@@ -71,7 +71,6 @@ export class GameScene extends Phaser.Scene {
 
 
     this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
-
     this.physics.add.overlap(this.enemies, this.airplane, this.handlePlayerHit, undefined, this);
 
     // Animación explosión
@@ -104,6 +103,9 @@ export class GameScene extends Phaser.Scene {
 
     // Nombre jugador
     const playerName = localStorage.getItem('playerName') || 'Player';
+    this.playerName = localStorage.getItem('playerName') || 'Player';
+    this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
+
     this.add.text(this.scale.width / 2, 32, playerName, {
       fontSize: '20px',
       color: '#ffffff',
@@ -111,9 +113,6 @@ export class GameScene extends Phaser.Scene {
       stroke: '#000000',
       strokeThickness: 3
     }).setOrigin(0.5);
-
-    this.playerName = localStorage.getItem('playerName') || 'Player';
-    this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
 
     // Level
     this.add.text(this.scale.width - 20, 16, 'Level 1', {
@@ -125,17 +124,30 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(1, 0);
 
     // Texto que aparece al pausar
-    this.pauseText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'PAUSE', {
-      fontSize: '48px',
+    this.pauseText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 20, 'Paused', {
+      fontSize: '32px',
       color: '#ffffff',
       fontFamily: 'Arial',
       stroke: '#000000',
-      strokeThickness: 4
+      strokeThickness: 3
     }).setOrigin(0.5);
     this.pauseText.setVisible(false);
 
-  }
+    this.resumeButton = this.add.text(this.scale.width / 2, this.scale.height / 2 + 30, 'Resume', {
+      fontSize: '24px',
+      backgroundColor: '#00ccff',
+      color: '#000',
+      padding: { x: 16, y: 8 },
+      fontFamily: 'Arial'
+    }).setOrigin(0.5).setInteractive();
 
+    this.resumeButton.setName('resumeButton');
+    this.resumeButton.setVisible(false);
+    this.resumeButton.on('pointerdown', () => {
+      this.resumeGame();
+    });
+
+  }
 
   override update(): void {
 
@@ -144,16 +156,13 @@ export class GameScene extends Phaser.Scene {
       this.physics.world.pause();
       this.paused = true;
       this.pauseText.setVisible(true);
+      this.resumeButton.setVisible(true);
     }
 
-    // Reanudar
     if (Phaser.Input.Keyboard.JustDown(this.resumeKey)) {
-      this.physics.world.resume();
-      this.paused = false;
-      this.pauseText.setVisible(false);
+      this.resumeGame();
     }
 
-    // Si está pausado, no ejecutar más lógica
     if (this.paused) return;
 
     this.airplane.setVelocityX(0);
@@ -172,7 +181,6 @@ export class GameScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
       this.shootBullet();
     }
-
   }
 
   private shootBullet(): void {
@@ -247,6 +255,13 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(1000, () => {
       this.scene.start('GameOverScene', {score: this.score});
     });
+  }
+
+  private resumeGame(): void {
+    this.physics.world.resume();
+    this.paused = false;
+    this.pauseText.setVisible(false);
+    this.resumeButton.setVisible(false);
   }
 
 }
