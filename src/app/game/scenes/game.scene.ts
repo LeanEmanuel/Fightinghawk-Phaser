@@ -4,6 +4,9 @@ export class GameScene extends Phaser.Scene {
   private airplane!: Phaser.Physics.Arcade.Sprite;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
+  private bullets!: Phaser.Physics.Arcade.Group;
+  private spaceKey!: Phaser.Input.Keyboard.Key;
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -13,6 +16,8 @@ export class GameScene extends Phaser.Scene {
       frameWidth: 64,
       frameHeight: 64,
     });
+
+    this.load.image('bullet', 'assets/sprites/bullet_01_32x32.png');
   }
 
   create(): void {
@@ -22,7 +27,16 @@ export class GameScene extends Phaser.Scene {
 
     // Input de teclado
     this.cursors = this.input!.keyboard!.createCursorKeys();
+    this.spaceKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    // Grupo de balas
+    this.bullets = this.physics.add.group({
+      classType: Phaser.Physics.Arcade.Image,
+      runChildUpdate: true
+    });
   }
+
+
 
   override update(): void {
     this.airplane.setVelocityX(0);
@@ -37,5 +51,27 @@ export class GameScene extends Phaser.Scene {
     else {
       this.airplane.setFrame(2); // centro
     }
+
+    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+      this.shootBullet();
+    }
+
   }
+
+  private shootBullet(): void {
+    const bullet = this.bullets.get(
+      this.airplane.x,
+      this.airplane.y - 30,
+      'bullet'
+    ) as Phaser.Physics.Arcade.Image;
+
+    if (bullet) {
+      bullet.setActive(true);
+      bullet.setVisible(true);
+      bullet.setVelocityY(-400);
+      bullet.setScale(0.5);
+      bullet.setAngle(-90);
+    }
+  }
+
 }
