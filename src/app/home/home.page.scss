@@ -40,10 +40,22 @@ ion-item {
   margin-bottom: 16px;
 }
 
-ion-label,
+ion-label {
+  color: #ff00cc !important;
+  font-family: 'Orbitron', sans-serif !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+
 ion-input {
   color: #fff;
   font-family: 'Orbitron', sans-serif;
+}
+
+ion-item.item-has-focus ion-label {
+  color: #aa00ff !important;
+  text-shadow: 0 0 5px rgba(170, 0, 255, 0.5) !important;
 }
 
 ion-button {

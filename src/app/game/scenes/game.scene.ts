@@ -21,6 +21,7 @@ export class GameScene extends Phaser.Scene {
   private paused: boolean = false;
   private pauseText!: Phaser.GameObjects.Text;
   private resumeButton!: Phaser.GameObjects.Text;
+  private exitButton!: Phaser.GameObjects.Text;
 
   constructor() {
     super({key: 'GameScene'});
@@ -158,6 +159,21 @@ export class GameScene extends Phaser.Scene {
       fontFamily: 'Arial'
     }).setOrigin(0.5).setInteractive();
 
+    this.exitButton = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, 'Exit to Menu', {
+      fontSize: '22px',
+      backgroundColor: '#ff4d4d',
+      color: '#000',
+      padding: { x: 16, y: 8 },
+      fontFamily: 'Arial'
+    }).setOrigin(0.5).setInteractive();
+
+    this.exitButton.setName('exitButton');
+    this.exitButton.setVisible(false);
+
+    this.exitButton.on('pointerdown', () => {
+      window.location.href = '/home'; // o this.scene.start('HomeScene') si tienes una escena
+    });
+
     this.resumeButton.setName('resumeButton');
     this.resumeButton.setVisible(false);
     this.resumeButton.on('pointerdown', () => {
@@ -174,6 +190,7 @@ export class GameScene extends Phaser.Scene {
       this.paused = true;
       this.pauseText.setVisible(true);
       this.resumeButton.setVisible(true);
+      this.exitButton.setVisible(true);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.resumeKey)) {
@@ -286,6 +303,7 @@ export class GameScene extends Phaser.Scene {
     this.paused = false;
     this.pauseText.setVisible(false);
     this.resumeButton.setVisible(false);
+    this.exitButton.setVisible(false);
   }
 
 }
