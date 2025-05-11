@@ -71,7 +71,7 @@ export class GameOverScene extends Phaser.Scene {
 
     // Botón "Menú" con estilo arcade
     const menuText = this.add
-      .text(width / 2, height / 2 + 130, "MAIN MENU", {
+      .text(width / 2, height / 2 + 130, "HOME", {
         fontSize: "18px",
         fontFamily: "Orbitron, sans-serif",
         backgroundColor: "#ff00cc",

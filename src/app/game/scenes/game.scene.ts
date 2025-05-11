@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 
 export class GameScene extends Phaser.Scene {
   private airplane!: Phaser.Physics.Arcade.Sprite;
+  private lives: number = 3;
+  private lifeIcons: Phaser.GameObjects.Image[] = [];
+
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private spaceKey!: Phaser.Input.Keyboard.Key;
 
@@ -10,6 +13,7 @@ export class GameScene extends Phaser.Scene {
 
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemies!: Phaser.Physics.Arcade.Group;
+  private enemyBullets!: Phaser.Physics.Arcade.Group;
 
   private score: number = 0;
   private scoreText!: Phaser.GameObjects.Text;
@@ -34,8 +38,14 @@ export class GameScene extends Phaser.Scene {
       frameHeight: 64,
     });
 
+    // Vidas
+    this.load.image('heart', 'assets/sprites/hp.png');
+
     //Balas
     this.load.image('bullet', 'assets/sprites/bullet_01_32x32.png');
+
+    // Balas enemigas
+    this.load.image('enemyBullet', 'assets/sprites/enemy_bullet.png');
 
     // Imagenes naves enemigas
     this.load.image('enemy1', 'assets/sprites/ship2.png');
@@ -64,12 +74,21 @@ export class GameScene extends Phaser.Scene {
 
     this.airplane = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'airplanes', 0);
     this.airplane.setCollideWorldBounds(true);
+    this.airplane.setScale(1.2);
 
     // Input de teclado
     this.cursors = this.input!.keyboard!.createCursorKeys();
     this.spaceKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.pauseKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
     this.resumeKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+    // Lista de vidas
+    for (let i = 0; i < this.lives; i++) {
+      const heart = this.add.image(this.scale.width - 20 - i * 30, 50, 'heart')
+        .setScale(0.05)
+        .setScrollFactor(0);
+      this.lifeIcons.push(heart);
+    }
 
     // Grupo de balas
     this.bullets = this.physics.add.group({
@@ -86,8 +105,15 @@ export class GameScene extends Phaser.Scene {
       loop: true
     });
 
+    this.enemyBullets = this.physics.add.group({
+      classType: Phaser.Physics.Arcade.Image,
+      runChildUpdate: true
+    });
+
+
     this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
     this.physics.add.overlap(this.enemies, this.airplane, this.handlePlayerHit, undefined, this);
+    this.physics.add.overlap(this.enemyBullets, this.airplane, this.playerHitByBullet, undefined, this);
 
     // Animación explosión
     this.anims.create({
@@ -183,15 +209,6 @@ export class GameScene extends Phaser.Scene {
     this.resumeButton.setName("resumeButton");
     this.resumeButton.setVisible(false);
 
-    // Efecto hover
-    this.resumeButton.on("pointerover", () => {
-      this.resumeButton.setStyle({backgroundColor: "#b742f3"})
-    });
-
-    this.resumeButton.on("pointerout", () => {
-      this.resumeButton.setStyle({backgroundColor: "#aa00ff"})
-    });
-
     this.resumeButton.on("pointerdown", () => {
       this.resumeGame()
     });
@@ -209,18 +226,15 @@ export class GameScene extends Phaser.Scene {
 
     this.exitButton.setVisible(false);
 
-    // Efecto hover
-    this.exitButton.on("pointerover", () => {
-      this.exitButton.setStyle({backgroundColor: "#ff0000"})
-    });
-
-    this.exitButton.on("pointerout", () => {
-      this.exitButton.setStyle({backgroundColor: "#cc0000"})
-    });
-
     this.exitButton.on("pointerdown", () => {
       window.location.href = "/home"
     });
+
+    this.children.bringToTop(this.scoreText);
+    this.children.bringToTop(this.pauseText);
+    this.children.bringToTop(this.resumeButton);
+    this.children.bringToTop(this.exitButton);
+    this.lifeIcons.forEach(icon => this.children.bringToTop(icon));
   }
 
   override update(): void {
@@ -289,10 +303,27 @@ export class GameScene extends Phaser.Scene {
     const enemy = this.enemies.create(x, -50, sprite) as Phaser.Physics.Arcade.Image;
     // Velocidad hacia abajo aleatoria
     enemy.setVelocityY(Phaser.Math.Between(100, 150));
-
     // Escala proporcional
     enemy.setScale(0.25);
 
+    this.time.addEvent({
+      delay: Phaser.Math.Between(1500, 2500),
+      callback: () => this.enemyShoot(enemy),
+      callbackScope: this,
+      repeat: 2
+    });
+  }
+
+  private enemyShoot(enemy: Phaser.Physics.Arcade.Image): void {
+    if (!enemy.active || this.paused) return;
+
+    const bullet = this.enemyBullets.get(enemy.x, enemy.y + 20, 'enemyBullet') as Phaser.Physics.Arcade.Image;
+    if (bullet) {
+      bullet.setActive(true);
+      bullet.setVisible(true);
+      bullet.setVelocityY(200);
+      bullet.setScale(0.4);
+    }
   }
 
   private destroyEnemy(bullet: any, enemy: any): void {
@@ -320,10 +351,11 @@ export class GameScene extends Phaser.Scene {
 
   private handlePlayerHit(player: any, enemy: any): void {
     const p = player as Phaser.Physics.Arcade.Sprite;
-    const e = enemy as Phaser.Physics.Arcade.Image;
 
-    // Destruir enemigo
-    e.destroy();
+    if (enemy) {
+      const e = enemy as Phaser.Physics.Arcade.Image;
+      e.destroy();
+    }
 
     // Reproducir explosión en la posición del jugador
     const explosion = this.add.sprite(p.x, p.y, 'explosion1');
@@ -338,6 +370,18 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(1000, () => {
       this.scene.start('GameOverScene', {score: this.score});
     });
+  }
+
+  private playerHitByBullet(player: any, bullet: any): void {
+    bullet.destroy();
+    this.lives--;
+
+    const lostHeart = this.lifeIcons.pop();
+    lostHeart?.destroy();
+
+    if (this.lives <= 0) {
+      this.handlePlayerHit(player, null);
+    }
   }
 
   private resumeGame(): void {
