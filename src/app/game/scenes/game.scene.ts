@@ -9,6 +9,9 @@ export class GameScene extends Phaser.Scene {
 
   private enemies!: Phaser.Physics.Arcade.Group;
 
+  private score: number = 0;
+  private scoreText!: Phaser.GameObjects.Text;
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -69,6 +72,15 @@ export class GameScene extends Phaser.Scene {
       })),
       frameRate: 20,
       hideOnComplete: true
+    });
+
+    // Texto scores
+    this.scoreText = this.add.text(16, 16, 'Puntos: 0', {
+      fontSize: '24px',
+      color: '#ffffff',
+      fontFamily: 'Arial',
+      stroke: '#000000',
+      strokeThickness: 3
     });
 
   }
@@ -136,6 +148,10 @@ export class GameScene extends Phaser.Scene {
     explosion.play('explode');
 
     e.destroy();
+
+    // Aumentar puntuación y actualizar texto
+    this.score += 1;
+    this.scoreText.setText('Score: ' + this.score);
   }
 
 
