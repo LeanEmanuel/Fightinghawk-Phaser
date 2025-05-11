@@ -193,7 +193,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private handlePlayerHit(player: Phaser.GameObjects.GameObject, enemy: Phaser.GameObjects.GameObject): void {
+  private handlePlayerHit(player: any, enemy: any): void {
     const p = player as Phaser.Physics.Arcade.Sprite;
     const e = enemy as Phaser.Physics.Arcade.Image;
 
@@ -209,10 +209,10 @@ export class GameScene extends Phaser.Scene {
     p.setVisible(false);
     p.disableBody(true, true);
 
-    // Detener el juego tras un momento
+    // Transición a Game Over
     this.time.delayedCall(1000, () => {
       this.scene.start('GameOverScene', { score: this.score });
     });
   }
-  
+
 }
