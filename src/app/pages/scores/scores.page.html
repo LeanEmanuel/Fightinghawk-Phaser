@@ -1,16 +1,15 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Scores</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="scores-content">
+  <div class="scores-container">
+    <h1 class="scores-title">TOP PILOTS</h1>
 
-<ion-content class="ion-padding">
-  <ion-list>
-    <ion-item *ngFor="let item of scoreList">
-      <ion-label>
-        <h2>{{ item.name }}</h2>
-        <p>{{ item.score }} scores</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+    <div class="scores-list">
+      <div class="score-item" *ngFor="let item of scoreList; let i = index">
+        <div class="rank">{{ i + 1 }}</div>
+        <div class="name">{{ item.name }}</div>
+        <div class="score">{{ item.score }}</div>
+      </div>
+    </div>
+
+    <ion-button expand="block" (click)="goToHome()" class="return-button">RETURN TO MENU</ion-button>
+  </div>
 </ion-content>

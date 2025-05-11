@@ -1,24 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import {IonContent, IonHeader, IonItem, IonLabel, IonList, IonTitle, IonToolbar} from "@ionic/angular/standalone";
+import {Component, OnInit} from '@angular/core';
+import {
+  IonButton,
+  IonContent,
+} from "@ionic/angular/standalone";
 import {NgForOf} from "@angular/common";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-scores',
   templateUrl: './scores.page.html',
   styleUrls: ['./scores.page.scss'],
   imports: [
-    IonToolbar,
-    IonTitle,
     IonContent,
-    IonList,
-    IonItem,
-    IonLabel,
     NgForOf,
-    IonHeader
+    IonButton,
   ],
   standalone: true
 })
 export class ScoresPage implements OnInit {
+  constructor(private router: Router) {}
   public scoreList: { name: string, score: number }[] = [];
 
   ngOnInit() {
@@ -30,12 +30,16 @@ export class ScoresPage implements OnInit {
       if (key && key.startsWith('highscore_')) {
         const name = key.replace('highscore_', '');
         const score = parseInt(localStorage.getItem(key) || '0');
-        this.scoreList.push({ name, score });
+        this.scoreList.push({name, score});
       }
     }
 
     // Ordenar de mayor a menor
     this.scoreList.sort((a, b) => b.score - a.score);
+  }
+
+  goToHome() {
+    this.router.navigateByUrl('/home');
   }
 }
 

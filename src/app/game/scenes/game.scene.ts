@@ -22,6 +22,7 @@ export class GameScene extends Phaser.Scene {
   private pauseText!: Phaser.GameObjects.Text;
   private resumeButton!: Phaser.GameObjects.Text;
   private exitButton!: Phaser.GameObjects.Text;
+  private pausePanel!: Phaser.GameObjects.Rectangle;
 
   constructor() {
     super({key: 'GameScene'});
@@ -61,8 +62,6 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
-
-
     this.airplane = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'airplanes', 0);
     this.airplane.setCollideWorldBounds(true);
 
@@ -87,7 +86,6 @@ export class GameScene extends Phaser.Scene {
       loop: true
     });
 
-
     this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
     this.physics.add.overlap(this.enemies, this.airplane, this.handlePlayerHit, undefined, this);
 
@@ -102,21 +100,21 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Texto scores
-    this.scoreText = this.add.text(16, 16, 'Score: 0', {
-      fontSize: '20px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
-      stroke: '#000000',
-      strokeThickness: 3
+    this.scoreText = this.add.text(16, 16, "SCORE: 0", {
+      fontSize: "20px",
+      color: "#ff00cc",
+      fontFamily: "Orbitron, Arial, sans-serif",
+      stroke: "#000000",
+      strokeThickness: 3,
     });
 
     //High score
-    this.add.text(16, 44, `High Score: ${this.bestScore}`, {
-      fontSize: '18px',
-      color: '#ffcc00',
-      fontFamily: 'Arial',
-      stroke: '#000000',
-      strokeThickness: 2
+    this.add.text(16, 44, `HIGH SCORE: ${this.bestScore}`, {
+      fontSize: "14px",
+      color: "#ffcc00",
+      fontFamily: "Orbitron, Arial, sans-serif",
+      stroke: "#000000",
+      strokeThickness: 1,
     });
 
     // Nombre jugador
@@ -124,62 +122,105 @@ export class GameScene extends Phaser.Scene {
     this.playerName = localStorage.getItem('playerName') || 'Player';
     this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
 
-    this.add.text(this.scale.width / 2, 32, playerName, {
-      fontSize: '20px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5);
+    this.add
+      .text(this.scale.width / 2, 32, playerName.toUpperCase(), {
+        fontSize: "20px",
+        color: "#ffffff",
+        fontFamily: "Orbitron, Arial, sans-serif",
+        stroke: "#000000",
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
 
     // Level
-    this.add.text(this.scale.width - 20, 16, 'Level 1', {
-      fontSize: '20px',
-      color: '#00ffcc',
-      fontFamily: 'Arial',
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(1, 0);
+    this.add
+      .text(this.scale.width - 20, 16, "LEVEL 1", {
+        fontSize: "20px",
+        color: "#aa00ff",
+        fontFamily: "Orbitron, Arial, sans-serif",
+        stroke: "#000000",
+        strokeThickness: 2,
+      })
+      .setOrigin(1, 0);
+
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+
+    this.pausePanel = this.add.rectangle(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      300,
+      200,
+      0x000000,
+      0.7
+    ).setOrigin(0.5);
+    this.pausePanel.setVisible(false);
 
     // Texto que aparece al pausar
-    this.pauseText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 20, 'Paused', {
-      fontSize: '32px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5);
+    this.pauseText = this.add
+      .text(centerX, centerY - 60, "PAUSED", {
+        fontSize: "40px",
+        color: "#ff00cc",
+        fontFamily: "Orbitron, Arial, sans-serif",
+        stroke: "#000000",
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5)
     this.pauseText.setVisible(false);
 
-    this.resumeButton = this.add.text(this.scale.width / 2, this.scale.height / 2 + 30, 'Resume', {
-      fontSize: '24px',
-      backgroundColor: '#00ccff',
-      color: '#000',
-      padding: { x: 16, y: 8 },
-      fontFamily: 'Arial'
-    }).setOrigin(0.5).setInteractive();
+    // Botón de reanudar
+    this.resumeButton = this.add
+      .text(centerX, centerY - 10, "Resume", {
+        fontSize: "20px",
+        backgroundColor: "#aa00ff",
+        color: "#ffffff",
+        padding: {x: 20, y: 10},
+        fontFamily: "Orbitron, Arial, sans-serif",
+      })
+      .setOrigin(0.5)
+      .setInteractive();
 
-    this.exitButton = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, 'Exit to Menu', {
-      fontSize: '22px',
-      backgroundColor: '#ff4d4d',
-      color: '#000',
-      padding: { x: 16, y: 8 },
-      fontFamily: 'Arial'
-    }).setOrigin(0.5).setInteractive();
+    this.resumeButton.setName("resumeButton");
+    this.resumeButton.setVisible(false);
 
-    this.exitButton.setName('exitButton');
+    // Efecto hover
+    this.resumeButton.on("pointerover", () => {
+      this.resumeButton.setStyle({backgroundColor: "#b742f3"})
+    });
+
+    this.resumeButton.on("pointerout", () => {
+      this.resumeButton.setStyle({backgroundColor: "#aa00ff"})
+    });
+
+    this.resumeButton.on("pointerdown", () => {
+      this.resumeGame()
+    });
+
+    this.exitButton = this.add
+      .text(centerX, centerY + 50, "Exit", {
+        fontSize: "20px",
+        backgroundColor: "#cc0000",
+        color: "#ffffff",
+        padding: {x: 20, y: 10},
+        fontFamily: "Orbitron, Arial, sans-serif",
+      })
+      .setOrigin(0.5)
+      .setInteractive();
+
     this.exitButton.setVisible(false);
 
-    this.exitButton.on('pointerdown', () => {
-      window.location.href = '/home'; // o this.scene.start('HomeScene') si tienes una escena
+    // Efecto hover
+    this.exitButton.on("pointerover", () => {
+      this.exitButton.setStyle({backgroundColor: "#ff0000"})
     });
 
-    this.resumeButton.setName('resumeButton');
-    this.resumeButton.setVisible(false);
-    this.resumeButton.on('pointerdown', () => {
-      this.resumeGame();
+    this.exitButton.on("pointerout", () => {
+      this.exitButton.setStyle({backgroundColor: "#cc0000"})
     });
 
+    this.exitButton.on("pointerdown", () => {
+      window.location.href = "/home"
+    });
   }
 
   override update(): void {
@@ -191,6 +232,7 @@ export class GameScene extends Phaser.Scene {
       this.pauseText.setVisible(true);
       this.resumeButton.setVisible(true);
       this.exitButton.setVisible(true);
+      this.pausePanel.setVisible(true);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.resumeKey)) {
@@ -304,6 +346,7 @@ export class GameScene extends Phaser.Scene {
     this.pauseText.setVisible(false);
     this.resumeButton.setVisible(false);
     this.exitButton.setVisible(false);
+    this.pausePanel.setVisible(false);
   }
 
 }

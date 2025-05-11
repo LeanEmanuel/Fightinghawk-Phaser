@@ -8,7 +8,6 @@ import {
   IonLabel,
 } from "@ionic/angular/standalone";
 import {FormsModule} from "@angular/forms";
-import {NgOptimizedImage} from "@angular/common";
 
 @Component({
   selector: 'app-home',
