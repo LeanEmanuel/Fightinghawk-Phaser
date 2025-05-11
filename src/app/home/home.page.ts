@@ -38,5 +38,9 @@ export class HomePage {
     localStorage.setItem('playerName', this.playerName.trim());
     this.router.navigateByUrl('/game');
   }
+
+  goToScores() {
+    this.router.navigateByUrl('/scores');
+  }
 }
 
