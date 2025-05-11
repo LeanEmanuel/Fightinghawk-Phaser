@@ -3,9 +3,11 @@ import Phaser from 'phaser';
 export class GameScene extends Phaser.Scene {
   private airplane!: Phaser.Physics.Arcade.Sprite;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private spaceKey!: Phaser.Input.Keyboard.Key;
 
   private bullets!: Phaser.Physics.Arcade.Group;
-  private spaceKey!: Phaser.Input.Keyboard.Key;
+
+  private enemies!: Phaser.Physics.Arcade.Group;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -18,6 +20,10 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.load.image('bullet', 'assets/sprites/bullet_01_32x32.png');
+
+    // Imagenes naves enemigas
+    this.load.image('enemy1', 'assets/sprites/ship2.png');
+    this.load.image('enemy2', 'assets/sprites/ship2b.png');
   }
 
   create(): void {
@@ -34,6 +40,16 @@ export class GameScene extends Phaser.Scene {
       classType: Phaser.Physics.Arcade.Image,
       runChildUpdate: true
     });
+
+    // Grupo de enemigos
+    this.enemies = this.physics.add.group();
+    this.time.addEvent({
+      delay: 3000, // cada 3 segundo
+      callback: this.spawnEnemy,
+      callbackScope: this,
+      loop: true
+    });
+
   }
 
 
@@ -52,6 +68,7 @@ export class GameScene extends Phaser.Scene {
       this.airplane.setFrame(2); // centro
     }
 
+    // Disparo
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
       this.shootBullet();
     }
@@ -72,6 +89,19 @@ export class GameScene extends Phaser.Scene {
       bullet.setScale(0.5);
       bullet.setAngle(-90);
     }
+  }
+
+  private spawnEnemy(): void {
+    const x = Phaser.Math.Between(50, this.scale.width - 50);
+    const sprite = Phaser.Math.Between(0, 1) === 0 ? 'enemy1' : 'enemy2';
+
+    const enemy = this.enemies.create(x, -50, sprite) as Phaser.Physics.Arcade.Image;
+    // Velocidad hacia abajo aleatoria
+    enemy.setVelocityY(Phaser.Math.Between(80, 120));
+
+    // Escala proporcional
+    enemy.setScale(0.25);
+
   }
 
 }
