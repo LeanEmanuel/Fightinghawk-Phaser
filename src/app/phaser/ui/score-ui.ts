@@ -7,7 +7,7 @@ export class ScoreUI {
   private scene: Phaser.Scene;
   private score: number = 0;
   private bestScore: number = 0;
-  private playerName: string;
+  private readonly playerName: string;
 
 
   private scoreText: Phaser.GameObjects.Text;

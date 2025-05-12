@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { PauseUI } from "../ui/pause-ui";
 import { LivesUI } from "../ui/lives-ui";
 import { ScoreUI } from "../ui/score-ui";
+import { LevelUI } from "../ui/level-ui";
 
 
 /**
@@ -14,6 +15,8 @@ export class GameScene extends Phaser.Scene {
 
   /** Heart icons displayed on the screen */
   private livesUI!: LivesUI;
+
+  private levelUI!: LevelUI;
 
   /** Input controls */
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -148,14 +151,7 @@ export class GameScene extends Phaser.Scene {
     this.scoreUI = new ScoreUI(this);
 
     // Level
-    this.levelText = this.add.text(this.scale.width - 20, 16, "LEVEL 1", {
-        fontSize: "20px",
-        color: "#aa00ff",
-        fontFamily: "Orbitron, Arial, sans-serif",
-        stroke: "#000000",
-        strokeThickness: 2,
-      })
-      .setOrigin(1, 0);
+    this.levelUI = new LevelUI(this);
 
 
     this.pauseUI = new PauseUI(this, () => this.resumeGame(), () => {

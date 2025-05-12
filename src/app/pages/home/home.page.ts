@@ -36,7 +36,8 @@ export class HomePage {
    * Stores the player name in localStorage and navigates to the game scene.
    */
   startGame() {
-    localStorage.setItem('playerName', this.playerName.trim());
+    const name = this.playerName.trim().substring(0, 8);
+    localStorage.setItem('playerName', name);
     this.router.navigateByUrl('/game');
   }
 
