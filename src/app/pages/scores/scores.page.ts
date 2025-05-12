@@ -46,8 +46,10 @@ export class ScoresPage implements OnInit {
       }
     }
 
-    // Sort scores in descending order
-    this.scoreList.sort((a, b) => b.score - a.score);
+    // Sort scores in descending order and take the top 5
+    this.scoreList = this.scoreList
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
   }
 
   /**
