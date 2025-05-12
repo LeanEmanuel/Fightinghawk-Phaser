@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { PauseUI } from "../ui/pause-ui";
 import { LivesUI } from "../ui/lives-ui";
+import { ScoreUI } from "../ui/score-ui";
 
 
 /**
@@ -34,13 +35,8 @@ export class GameScene extends Phaser.Scene {
   private enemyBullets!: Phaser.Physics.Arcade.Group;
 
   /** Score and UI */
-  private score: number = 0;
-  private scoreText!: Phaser.GameObjects.Text;
-  private highScoreText!: Phaser.GameObjects.Text;
-  private playerNameText!: Phaser.GameObjects.Text;
+  private scoreUI!: ScoreUI;
   private levelText!: Phaser.GameObjects.Text;
-  private bestScore: number = 0;
-  private playerName: string = '';
 
   /** Pause system */
   private pauseUI!: PauseUI;
@@ -112,7 +108,7 @@ export class GameScene extends Phaser.Scene {
     // Lives and heart icons
     this.livesUI = new LivesUI(this);
     this.livesUI.reset();
-    
+
     // Group of bullets
     this.bullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
@@ -149,37 +145,7 @@ export class GameScene extends Phaser.Scene {
       hideOnComplete: true
     });
 
-    // Texto scores
-    this.scoreText = this.add.text(16, 16, "SCORE: 0", {
-      fontSize: "20px",
-      color: "#ff00cc",
-      fontFamily: "Orbitron, Arial, sans-serif",
-      stroke: "#000000",
-      strokeThickness: 3,
-    });
-
-    //High score
-    this.highScoreText = this.add.text(16, 44, `HIGH SCORE: ${this.bestScore}`, {
-      fontSize: "14px",
-      color: "#ffcc00",
-      fontFamily: "Orbitron, Arial, sans-serif",
-      stroke: "#000000",
-      strokeThickness: 1,
-    });
-
-    // Player name
-    const playerName = localStorage.getItem('playerName') || 'Player';
-    this.playerName = localStorage.getItem('playerName') || 'Player';
-    this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
-
-    this.playerNameText = this.add.text(this.scale.width / 2, 32, playerName.toUpperCase(), {
-        fontSize: "20px",
-        color: "#ffffff",
-        fontFamily: "Orbitron, Arial, sans-serif",
-        stroke: "#000000",
-        strokeThickness: 3,
-      })
-      .setOrigin(0.5);
+    this.scoreUI = new ScoreUI(this);
 
     // Level
     this.levelText = this.add.text(this.scale.width - 20, 16, "LEVEL 1", {
@@ -198,11 +164,7 @@ export class GameScene extends Phaser.Scene {
 
 
     // Depth adjustment for HUD
-    this.scoreText.setDepth(10);
-    this.highScoreText.setDepth(10);
-    this.playerNameText.setDepth(10);
     this.levelText.setDepth(10);
-    this.lifeIcons.forEach(icon => icon.setDepth(10));
 
     this.add.text(10, this.scale.height - 30, 'Press P to pause', {
       fontSize: '12px',
@@ -332,14 +294,8 @@ export class GameScene extends Phaser.Scene {
     e.destroy();
 
     // Increase punctuation and update text
-    this.score += 1;
-    this.scoreText.setText('SCORE: ' + this.score);
+    this.scoreUI.increase(1);
 
-    // Update record if exceeded
-    if (this.score > this.bestScore) {
-      this.bestScore = this.score;
-      localStorage.setItem(`highscore_${this.playerName}`, this.bestScore.toString());
-    }
   }
 
   /**
@@ -366,7 +322,7 @@ export class GameScene extends Phaser.Scene {
 
     // Transition to Game Over
     this.time.delayedCall(1000, () => {
-      this.scene.start('GameOverScene', {score: this.score});
+      this.scene.start('GameOverScene', { score: this.scoreUI.getScore() });
     });
   }
 
