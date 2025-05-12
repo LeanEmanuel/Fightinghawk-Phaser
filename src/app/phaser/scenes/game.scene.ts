@@ -3,47 +3,43 @@ import { PauseUI } from "../ui/pause-ui";
 import { LivesUI } from "../ui/lives-ui";
 import { ScoreUI } from "../ui/score-ui";
 import { LevelUI } from "../ui/level-ui";
+import { PlayerManager } from '../controller/player-manager';
+import { EnemyManager } from '../controller/enemy-manager';
 
 
 /**
- * GameScene handles the core gameplay loop, UI elements, player control, enemy behavior,
- * and pause management for the arcade-style shooter.
+ * Main gameplay scene for the arcade shooter.
+ * Manages background scrolling, UI, player and enemy managers, and game loop.
  */
 export class GameScene extends Phaser.Scene {
   /** Player's spaceship sprite */
   private airplane!: Phaser.Physics.Arcade.Sprite;
+
+  private playerManager!: PlayerManager;
+  private enemyManager!: EnemyManager;
+
+  /** Player bullets group */
+  private bullets!: Phaser.Physics.Arcade.Group;
+
+  /** Scrolling background layers */
+  private background1!: Phaser.GameObjects.TileSprite;
+  private background2!: Phaser.GameObjects.TileSprite;
+
+  /** Input controls */
+  private pauseKey!: Phaser.Input.Keyboard.Key;
+  private resumeKey!: Phaser.Input.Keyboard.Key;
+
+  /** Pause system */
+  private pauseUI!: PauseUI;
+  private paused: boolean = false;
 
   /** Heart icons displayed on the screen */
   private livesUI!: LivesUI;
 
   private levelUI!: LevelUI;
 
-  /** Input controls */
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private spaceKey!: Phaser.Input.Keyboard.Key;
-  private pauseKey!: Phaser.Input.Keyboard.Key;
-  private resumeKey!: Phaser.Input.Keyboard.Key;
-
-  /** Scrolling background layers */
-  private background1!: Phaser.GameObjects.TileSprite;
-  private background2!: Phaser.GameObjects.TileSprite;
-
-  /** Player bullets group */
-  private bullets!: Phaser.Physics.Arcade.Group;
-
-  /** Enemies group */
-  private enemies!: Phaser.Physics.Arcade.Group;
-
-  /** Enemy bullets group */
-  private enemyBullets!: Phaser.Physics.Arcade.Group;
-
   /** Score and UI */
   private scoreUI!: ScoreUI;
-  private levelText!: Phaser.GameObjects.Text;
-
-  /** Pause system */
-  private pauseUI!: PauseUI;
-  private paused: boolean = false;
 
 
   constructor() {
@@ -97,20 +93,25 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0);
 
-    // Player airplane setup
-    this.airplane = this.physics.add.sprite(this.scale.width / 2, this.scale.height - 100, 'airplanes', 0);
-    this.airplane.setCollideWorldBounds(true);
-    this.airplane.setScale(1.2);
+    // Setup player manager and get player sprite
+    this.playerManager = new PlayerManager(this);
+    this.airplane = this.playerManager.getSprite();
 
     // Input keys
-    this.cursors = this.input!.keyboard!.createCursorKeys();
-    this.spaceKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.pauseKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
     this.resumeKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     // Lives and heart icons
     this.livesUI = new LivesUI(this);
     this.livesUI.reset();
+
+    this.scoreUI = new ScoreUI(this);
+    this.levelUI = new LevelUI(this);
+
+    // Setup pause UI
+    this.pauseUI = new PauseUI(this, () => this.resumeGame(), () => {
+      window.location.href = '/home';
+    });
 
     // Group of bullets
     this.bullets = this.physics.add.group({
@@ -119,26 +120,15 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Group of enemies
-    this.enemies = this.physics.add.group();
-    this.time.addEvent({
-      delay: 2000, // cada X segundo spawn enemigos
-      callback: this.spawnEnemy,
-      callbackScope: this,
-      loop: true
-    });
+    this.enemyManager = new EnemyManager(this);
 
-    // Group enemies bullets
-    this.enemyBullets = this.physics.add.group({
-      classType: Phaser.Physics.Arcade.Image,
-      runChildUpdate: true
-    });
 
     // Collisions
-    this.physics.add.overlap(this.bullets, this.enemies, this.destroyEnemy, undefined, this);
-    this.physics.add.overlap(this.enemies, this.airplane, this.handlePlayerHit, undefined, this);
-    this.physics.add.overlap(this.enemyBullets, this.airplane, this.playerHitByBullet, undefined, this);
+    this.physics.add.overlap(this.bullets, this.enemyManager.getEnemies(), this.destroyEnemy, undefined, this);
+    this.physics.add.overlap(this.enemyManager.getEnemies(), this.airplane, this.handlePlayerHit, undefined, this);
+    this.physics.add.overlap(this.enemyManager.getEnemyBullets(), this.airplane, this.playerHitByBullet, undefined, this);
 
-    // Animación explosión
+    // Explosion animation
     this.anims.create({
       key: 'explode',
       frames: Array.from({length: 10}, (_, i) => ({
@@ -148,20 +138,7 @@ export class GameScene extends Phaser.Scene {
       hideOnComplete: true
     });
 
-    this.scoreUI = new ScoreUI(this);
-
-    // Level
-    this.levelUI = new LevelUI(this);
-
-
-    this.pauseUI = new PauseUI(this, () => this.resumeGame(), () => {
-      window.location.href = '/home';
-    });
-
-
-    // Depth adjustment for HUD
-    this.levelText.setDepth(10);
-
+    // Display pause hint
     this.add.text(10, this.scale.height - 30, 'Press P to pause', {
       fontSize: '12px',
       color: '#ffffff',
@@ -172,7 +149,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Main game loop, handles movement, shooting, and background scroll.
+   * Game update loop.
+   * Handles input, movement, shooting, and background scrolling.
    */
   override update(): void {
 
@@ -181,6 +159,7 @@ export class GameScene extends Phaser.Scene {
       this.physics.world.pause();
       this.paused = true;
       this.pauseUI.show();
+      this.enemyManager.pause();
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.resumeKey)) {
@@ -189,21 +168,9 @@ export class GameScene extends Phaser.Scene {
 
     if (this.paused) return;
 
-    this.airplane.setVelocityX(0);
+    this.playerManager.update();
 
-    // Movement control
-    if (this.cursors.left.isDown) {
-      this.airplane.setVelocityX(-200);
-      this.airplane.setFrame(0);// izquierda
-    } else if (this.cursors.right.isDown) {
-      this.airplane.setVelocityX(200);
-      this.airplane.setFrame(4) // derecha
-    } else {
-      this.airplane.setFrame(2); // centro
-    }
-
-    // Fire
-    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+    if (this.playerManager.isShooting()) {
       this.shootBullet();
     }
 
@@ -231,44 +198,6 @@ export class GameScene extends Phaser.Scene {
       bullet.setVelocityY(-400);
       bullet.setScale(0.5);
       bullet.setAngle(-90);
-    }
-  }
-
-  /**
-   * Spawns a single enemy and sets up its behavior and shooting.
-   */
-  private spawnEnemy(): void {
-    const x = Phaser.Math.Between(50, this.scale.width - 50);
-    const sprite = Phaser.Math.Between(0, 1) === 0 ? 'enemy1' : 'enemy2';
-
-    const enemy = this.enemies.create(x, -50, sprite) as Phaser.Physics.Arcade.Image;
-    // Velocidad hacia abajo aleatoria
-    enemy.setVelocityY(Phaser.Math.Between(100, 150));
-    // Escala proporcional
-    enemy.setScale(0.25);
-
-    this.time.addEvent({
-      delay: Phaser.Math.Between(1500, 2500),
-      callback: () => this.enemyShoot(enemy),
-      callbackScope: this,
-      repeat: 2
-    });
-  }
-
-  /**
-   * Spawns a bullet from a given enemy's position.
-   * @param enemy - The enemy that is shooting.
-   */
-  private enemyShoot(enemy: Phaser.Physics.Arcade.Image): void {
-    if (!enemy.active || this.paused) return;
-
-    const bullet = this.enemyBullets.get(enemy.x, enemy.y + 20, 'enemyBullet') as Phaser.Physics.Arcade.Image;
-    if (bullet) {
-      bullet.setActive(true);
-      bullet.setVisible(true);
-      bullet.setVelocityY(200);
-      bullet.setScale(0.4);
-      bullet.setAngle(90);
     }
   }
 
@@ -313,8 +242,7 @@ export class GameScene extends Phaser.Scene {
     explosion.play('explode');
 
     // Deactivate player
-    p.setVisible(false);
-    p.disableBody(true, true);
+    this.playerManager.disable();
 
     // Transition to Game Over
     this.time.delayedCall(1000, () => {
@@ -337,7 +265,6 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-
   /**
    * Resumes the game from paused state.
    */
@@ -345,6 +272,6 @@ export class GameScene extends Phaser.Scene {
     this.physics.world.resume();
     this.paused = false;
     this.pauseUI.hide();
+    this.enemyManager.resume();
   }
-
 }

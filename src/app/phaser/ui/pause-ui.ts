@@ -1,4 +1,3 @@
-// src/app/game/scenes/ui/pause-ui.ts
 import Phaser from 'phaser';
 
 export class PauseUI {
