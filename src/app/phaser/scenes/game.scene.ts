@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { PauseUI } from "./ui/pause-ui";
+import { PauseUI } from "../ui/pause-ui";
+import { LivesUI } from "../ui/lives-ui";
 
 
 /**
@@ -10,11 +11,8 @@ export class GameScene extends Phaser.Scene {
   /** Player's spaceship sprite */
   private airplane!: Phaser.Physics.Arcade.Sprite;
 
-  /** Remaining lives (hearts) */
-  private lives: number = 3;
-
   /** Heart icons displayed on the screen */
-  private lifeIcons: Phaser.GameObjects.Image[] = [];
+  private livesUI!: LivesUI;
 
   /** Input controls */
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -112,18 +110,9 @@ export class GameScene extends Phaser.Scene {
     this.resumeKey = this.input!.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     // Lives and heart icons
-    this.lives = 3;
-    this.lifeIcons.forEach(icon => icon.destroy());
-    this.lifeIcons = [];
-
-    for (let i = 0; i < this.lives; i++) {
-      const heart = this.add.image(this.scale.width - 20 - i * 30, 50, 'heart')
-        .setScale(0.05)
-        .setScrollFactor(0)
-        .setDepth(10);
-      this.lifeIcons.push(heart);
-    }
-
+    this.livesUI = new LivesUI(this);
+    this.livesUI.reset();
+    
     // Group of bullets
     this.bullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
@@ -388,12 +377,10 @@ export class GameScene extends Phaser.Scene {
    */
   private playerHitByBullet(player: any, bullet: any): void {
     bullet.destroy();
-    this.lives--;
 
-    const lostHeart = this.lifeIcons.pop();
-    lostHeart?.destroy();
+    this.livesUI.loseLife();
 
-    if (this.lives <= 0) {
+    if (this.livesUI.getLives() <= 0) {
       this.handlePlayerHit(player, null);
     }
   }
