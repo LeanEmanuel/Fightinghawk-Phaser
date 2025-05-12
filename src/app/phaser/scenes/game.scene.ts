@@ -5,6 +5,7 @@ import { ScoreUI } from "../ui/score-ui";
 import { LevelUI } from "../ui/level-ui";
 import { PlayerManager } from '../controller/player-manager';
 import { EnemyManager } from '../controller/enemy-manager';
+import { BulletManager } from '../controller/bullet-manager';
 
 
 /**
@@ -20,6 +21,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Player bullets group */
   private bullets!: Phaser.Physics.Arcade.Group;
+  private bulletManager!: BulletManager;
 
   /** Scrolling background layers */
   private background1!: Phaser.GameObjects.TileSprite;
@@ -114,19 +116,16 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Group of bullets
-    this.bullets = this.physics.add.group({
-      classType: Phaser.Physics.Arcade.Image,
-      runChildUpdate: true
-    });
+    this.bulletManager = new BulletManager(this);
 
     // Group of enemies
-    this.enemyManager = new EnemyManager(this);
+    this.enemyManager = new EnemyManager(this, this.bulletManager);
 
 
     // Collisions
-    this.physics.add.overlap(this.bullets, this.enemyManager.getEnemies(), this.destroyEnemy, undefined, this);
+    this.physics.add.overlap(this.bulletManager.getPlayerBullets(), this.enemyManager.getEnemies(), this.destroyEnemy, undefined, this);
     this.physics.add.overlap(this.enemyManager.getEnemies(), this.airplane, this.handlePlayerHit, undefined, this);
-    this.physics.add.overlap(this.enemyManager.getEnemyBullets(), this.airplane, this.playerHitByBullet, undefined, this);
+    this.physics.add.overlap(this.bulletManager.getEnemyBullets(), this.airplane, this.playerHitByBullet, undefined, this);
 
     // Explosion animation
     this.anims.create({
@@ -186,19 +185,7 @@ export class GameScene extends Phaser.Scene {
    * Creates and fires a bullet from the player's current position.
    */
   private shootBullet(): void {
-    const bullet = this.bullets.get(
-      this.airplane.x,
-      this.airplane.y - 30,
-      'bullet'
-    ) as Phaser.Physics.Arcade.Image;
-
-    if (bullet) {
-      bullet.setActive(true);
-      bullet.setVisible(true);
-      bullet.setVelocityY(-400);
-      bullet.setScale(0.5);
-      bullet.setAngle(-90);
-    }
+    this.bulletManager.firePlayerBullet(this.airplane.x, this.airplane.y);
   }
 
   /**

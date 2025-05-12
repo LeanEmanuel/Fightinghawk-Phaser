@@ -1,20 +1,17 @@
-// src/app/phaser/controller/enemy-manager.ts
 import Phaser from 'phaser';
+import { BulletManager } from './bullet-manager';
 
 export class EnemyManager {
   private scene: Phaser.Scene;
   private enemies: Phaser.Physics.Arcade.Group;
-  private enemyBullets: Phaser.Physics.Arcade.Group;
+  private bullets: BulletManager;
   private paused: boolean = false;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, bullets: BulletManager) {
     this.scene = scene;
+    this.bullets = bullets;
 
     this.enemies = this.scene.physics.add.group();
-    this.enemyBullets = this.scene.physics.add.group({
-      classType: Phaser.Physics.Arcade.Image,
-      runChildUpdate: true,
-    });
 
     this.scene.time.addEvent({
       delay: 2000,
@@ -44,24 +41,13 @@ export class EnemyManager {
 
   private enemyShoot(enemy: Phaser.Physics.Arcade.Image): void {
     if (!enemy.active || this.paused) return;
-
-    const bullet = this.enemyBullets.get(enemy.x, enemy.y + 20, 'enemyBullet') as Phaser.Physics.Arcade.Image;
-    if (bullet) {
-      bullet.setActive(true);
-      bullet.setVisible(true);
-      bullet.setVelocityY(200);
-      bullet.setScale(0.4);
-      bullet.setAngle(90);
-    }
+    this.bullets.fireEnemyBullet(enemy.x, enemy.y);
   }
 
   public getEnemies(): Phaser.Physics.Arcade.Group {
     return this.enemies;
   }
 
-  public getEnemyBullets(): Phaser.Physics.Arcade.Group {
-    return this.enemyBullets;
-  }
 
   public pause(): void {
     this.paused = true;
