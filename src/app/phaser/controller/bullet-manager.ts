@@ -1,12 +1,18 @@
-// src/app/phaser/controller/bullet-manager.ts
 import Phaser from 'phaser';
 
+/**
+ * Manages bullet creation and behavior for both the player and enemies.
+ */
 export class BulletManager {
   private scene: Phaser.Scene;
 
   private playerBullets: Phaser.Physics.Arcade.Group;
   private enemyBullets: Phaser.Physics.Arcade.Group;
 
+  /**
+   * Initializes bullet groups for player and enemy bullets.
+   * @param scene - The Phaser scene to which bullets belong.
+   */
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
 
@@ -22,9 +28,9 @@ export class BulletManager {
   }
 
   /**
-   * Fires a bullet from the player's ship.
-   * @param x - X position of the bullet.
-   * @param y - Y position of the bullet.
+   * Fires a bullet upward from the player's ship.
+   * @param x - The horizontal position to spawn the bullet.
+   * @param y - The vertical position to spawn the bullet.
    */
   public firePlayerBullet(x: number, y: number): void {
     const bullet = this.playerBullets.get(x, y - 30, 'bullet') as Phaser.Physics.Arcade.Image;
@@ -38,9 +44,9 @@ export class BulletManager {
   }
 
   /**
-   * Fires a bullet from an enemy ship.
-   * @param x - X position of the bullet.
-   * @param y - Y position of the bullet.
+   * Fires a bullet downward from an enemy ship.
+   * @param x - The horizontal position to spawn the bullet.
+   * @param y - The vertical position to spawn the bullet.
    */
   public fireEnemyBullet(x: number, y: number): void {
     const bullet = this.enemyBullets.get(x, y + 20, 'enemyBullet') as Phaser.Physics.Arcade.Image;
@@ -53,10 +59,16 @@ export class BulletManager {
     }
   }
 
+  /**
+   * Returns the group of player bullets.
+   */
   public getPlayerBullets(): Phaser.Physics.Arcade.Group {
     return this.playerBullets;
   }
 
+  /**
+   * Returns the group of enemy bullets.
+   */
   public getEnemyBullets(): Phaser.Physics.Arcade.Group {
     return this.enemyBullets;
   }

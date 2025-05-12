@@ -6,6 +6,7 @@ import { LevelUI } from "../ui/level-ui";
 import { PlayerManager } from '../controller/player-manager';
 import { EnemyManager } from '../controller/enemy-manager';
 import { BulletManager } from '../controller/bullet-manager';
+import { ExplosionManager } from '../controller/explosion-manager';
 
 
 /**
@@ -43,6 +44,7 @@ export class GameScene extends Phaser.Scene {
   /** Score and UI */
   private scoreUI!: ScoreUI;
 
+  private explosionManager!: ExplosionManager;
 
   constructor() {
     super({key: 'GameScene'});
@@ -122,20 +124,13 @@ export class GameScene extends Phaser.Scene {
     this.enemyManager = new EnemyManager(this, this.bulletManager);
 
 
+    this.explosionManager = new ExplosionManager(this);
+
     // Collisions
     this.physics.add.overlap(this.bulletManager.getPlayerBullets(), this.enemyManager.getEnemies(), this.destroyEnemy, undefined, this);
     this.physics.add.overlap(this.enemyManager.getEnemies(), this.airplane, this.handlePlayerHit, undefined, this);
     this.physics.add.overlap(this.bulletManager.getEnemyBullets(), this.airplane, this.playerHitByBullet, undefined, this);
 
-    // Explosion animation
-    this.anims.create({
-      key: 'explode',
-      frames: Array.from({length: 10}, (_, i) => ({
-        key: `explosion${i + 1}`
-      })),
-      frameRate: 20,
-      hideOnComplete: true
-    });
 
     // Display pause hint
     this.add.text(10, this.scale.height - 30, 'Press P to pause', {
@@ -199,9 +194,7 @@ export class GameScene extends Phaser.Scene {
 
     b.destroy();
 
-    const explosion = this.add.sprite(e.x, e.y, 'explosion1');
-    explosion.setScale(0.25);
-    explosion.play('explode');
+    this.explosionManager.spawn(e.x, e.y, 0.25);
 
     e.destroy();
 
@@ -223,10 +216,7 @@ export class GameScene extends Phaser.Scene {
       e.destroy();
     }
 
-    // Play explosion at player's position
-    const explosion = this.add.sprite(p.x, p.y, 'explosion1');
-    explosion.setScale(0.4);
-    explosion.play('explode');
+    this.explosionManager.spawn(p.x, p.y, 0.4);
 
     // Deactivate player
     this.playerManager.disable();

@@ -1,12 +1,20 @@
 import Phaser from 'phaser';
 import { BulletManager } from './bullet-manager';
 
+/**
+ * Handles enemy spawning, movement, and shooting.
+ */
 export class EnemyManager {
   private scene: Phaser.Scene;
   private enemies: Phaser.Physics.Arcade.Group;
   private bullets: BulletManager;
   private paused: boolean = false;
 
+  /**
+   * Initializes the enemy manager and sets up the spawn loop.
+   * @param scene - The Phaser scene reference.
+   * @param bullets - Instance of BulletManager to control enemy bullets.
+   */
   constructor(scene: Phaser.Scene, bullets: BulletManager) {
     this.scene = scene;
     this.bullets = bullets;
@@ -21,6 +29,10 @@ export class EnemyManager {
     });
   }
 
+  /**
+   * Spawns a new enemy at a random horizontal position with a downward velocity.
+   * Schedules the enemy to shoot 3 times.
+   */
   private spawnEnemy(): void {
     if (this.paused) return;
 
@@ -39,20 +51,32 @@ export class EnemyManager {
     });
   }
 
+  /**
+   * Makes a specific enemy shoot a bullet if it's still active.
+   * @param enemy - The enemy that will fire the bullet.
+   */
   private enemyShoot(enemy: Phaser.Physics.Arcade.Image): void {
     if (!enemy.active || this.paused) return;
     this.bullets.fireEnemyBullet(enemy.x, enemy.y);
   }
 
+  /**
+   * Returns the group of active enemies.
+   */
   public getEnemies(): Phaser.Physics.Arcade.Group {
     return this.enemies;
   }
 
-
+  /**
+   * Pauses enemy behavior including spawning and shooting.
+   */
   public pause(): void {
     this.paused = true;
   }
 
+  /**
+   * Resumes enemy behavior after being paused.
+   */
   public resume(): void {
     this.paused = false;
   }
