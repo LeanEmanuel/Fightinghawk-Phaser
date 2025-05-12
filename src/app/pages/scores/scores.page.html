@@ -1,0 +1,15 @@
+<ion-content class="scores-content">
+  <div class="scores-container">
+    <h1 class="scores-title">TOP PILOTS</h1>
+
+    <div class="scores-list">
+      <div class="score-item" *ngFor="let item of scoreList; let i = index">
+        <div class="rank">{{ i + 1 }}</div>
+        <div class="name">{{ item.name }}</div>
+        <div class="score">{{ item.score }}</div>
+      </div>
+    </div>
+
+    <ion-button expand="block" (click)="goToHome()" class="return-button">RETURN TO MENU</ion-button>
+  </div>
+</ion-content>

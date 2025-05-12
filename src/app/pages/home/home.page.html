@@ -1,0 +1,21 @@
+<!-- Root container of the home screen -->
+<ion-content>
+  <div class="home-container">
+
+    <!-- Game logo -->
+    <img src="../../../assets/img/logo.png" alt="Fightinghawk Logo" class="logo" />
+
+    <!-- Input and menu buttons -->
+    <div class="card">
+      <!-- Player name input -->
+      <ion-item>
+        <ion-label position="floating">Player name</ion-label>
+        <ion-input [(ngModel)]="playerName" maxlength="8"></ion-input>
+      </ion-item>
+
+      <!-- Navigation buttons -->
+      <ion-button expand="block" (click)="startGame()">Start game</ion-button>
+      <ion-button expand="block" (click)="goToScores()">High scores</ion-button>
+    </div>
+  </div>
+</ion-content>
