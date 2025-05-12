@@ -24,7 +24,8 @@ export class PauseUI {
 
     this.panel = scene.add.rectangle(centerX, centerY, 300, 200, 0x000000, 0.7)
       .setOrigin(0.5)
-      .setVisible(false);
+      .setVisible(false)
+      .setDepth(10);
 
     this.text = scene.add.text(centerX, centerY - 60, 'PAUSED', {
       fontSize: '40px',
@@ -32,27 +33,39 @@ export class PauseUI {
       fontFamily: 'Orbitron, Arial, sans-serif',
       stroke: '#000000',
       strokeThickness: 4,
-    }).setOrigin(0.5).setVisible(false);
+    })
+      .setOrigin(0.5)
+      .setVisible(false)
+      .setDepth(10);
 
     this.resumeButton = scene.add.text(centerX, centerY - 10, 'Resume', {
       fontSize: '20px',
       backgroundColor: '#aa00ff',
       color: '#ffffff',
-      padding: { x: 20, y: 10 },
+      padding: {x: 20, y: 10},
       fontFamily: 'Orbitron, Arial, sans-serif',
-    }).setOrigin(0.5).setInteractive().setVisible(false);
+    })
+      .setOrigin(0.5)
+      .setInteractive()
+      .setVisible(false)
+      .setDepth(10);
 
     this.exitButton = scene.add.text(centerX, centerY + 50, 'Exit', {
       fontSize: '20px',
       backgroundColor: '#cc0000',
       color: '#ffffff',
-      padding: { x: 20, y: 10 },
+      padding: {x: 20, y: 10},
       fontFamily: 'Orbitron, Arial, sans-serif',
-    }).setOrigin(0.5).setInteractive().setVisible(false);
+    })
+      .setOrigin(0.5)
+      .setInteractive()
+      .setVisible(false)
+      .setDepth(10);
 
     this.resumeButton.on('pointerdown', () => this.onResume());
     this.exitButton.on('pointerdown', () => this.onExit());
   }
+
 
   show() {
     this.panel.setVisible(true);

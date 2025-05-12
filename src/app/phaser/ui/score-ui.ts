@@ -9,6 +9,7 @@ export class ScoreUI {
   private bestScore: number = 0;
   private playerName: string;
 
+
   private scoreText: Phaser.GameObjects.Text;
   private highScoreText: Phaser.GameObjects.Text;
 
@@ -33,6 +34,16 @@ export class ScoreUI {
       stroke: '#000000',
       strokeThickness: 1
     }).setDepth(10);
+
+    const playerNameText = this.scene.add.text(this.scene.scale.width / 2, 32, this.playerName.toUpperCase(), {
+      fontSize: '20px',
+      color: '#ffffff',
+      fontFamily: 'Orbitron, Arial, sans-serif',
+      stroke: '#000000',
+      strokeThickness: 3,
+    })
+      .setOrigin(0.5)
+      .setDepth(10);
   }
 
   /**
