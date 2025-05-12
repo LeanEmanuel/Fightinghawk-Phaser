@@ -1,4 +1,6 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
+import { PauseUI } from "./ui/pause-ui";
+
 
 /**
  * GameScene handles the core gameplay loop, UI elements, player control, enemy behavior,
@@ -43,11 +45,9 @@ export class GameScene extends Phaser.Scene {
   private playerName: string = '';
 
   /** Pause system */
+  private pauseUI!: PauseUI;
   private paused: boolean = false;
-  private pauseText!: Phaser.GameObjects.Text;
-  private resumeButton!: Phaser.GameObjects.Text;
-  private exitButton!: Phaser.GameObjects.Text;
-  private pausePanel!: Phaser.GameObjects.Rectangle;
+
 
   constructor() {
     super({key: 'GameScene'});
@@ -202,67 +202,11 @@ export class GameScene extends Phaser.Scene {
       })
       .setOrigin(1, 0);
 
-    const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
 
-    this.pausePanel = this.add.rectangle(
-      this.scale.width / 2,
-      this.scale.height / 2,
-      300,
-      200,
-      0x000000,
-      0.7
-    ).setOrigin(0.5);
-    this.pausePanel.setVisible(false);
-
-    // Pause
-    this.pauseText = this.add
-      .text(centerX, centerY - 60, "PAUSED", {
-        fontSize: "40px",
-        color: "#ff00cc",
-        fontFamily: "Orbitron, Arial, sans-serif",
-        stroke: "#000000",
-        strokeThickness: 4,
-      })
-      .setOrigin(0.5)
-    this.pauseText.setVisible(false);
-
-    // Button resume
-    this.resumeButton = this.add
-      .text(centerX, centerY - 10, "Resume", {
-        fontSize: "20px",
-        backgroundColor: "#aa00ff",
-        color: "#ffffff",
-        padding: {x: 20, y: 10},
-        fontFamily: "Orbitron, Arial, sans-serif",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-
-    this.resumeButton.setName("resumeButton");
-    this.resumeButton.setVisible(false);
-
-    this.resumeButton.on("pointerdown", () => {
-      this.resumeGame()
+    this.pauseUI = new PauseUI(this, () => this.resumeGame(), () => {
+      window.location.href = '/home';
     });
 
-    // Button Exit
-    this.exitButton = this.add
-      .text(centerX, centerY + 50, "Exit", {
-        fontSize: "20px",
-        backgroundColor: "#cc0000",
-        color: "#ffffff",
-        padding: {x: 20, y: 10},
-        fontFamily: "Orbitron, Arial, sans-serif",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-
-    this.exitButton.setVisible(false);
-
-    this.exitButton.on("pointerdown", () => {
-      window.location.href = "/home"
-    });
 
     // Depth adjustment for HUD
     this.scoreText.setDepth(10);
@@ -289,10 +233,7 @@ export class GameScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
       this.physics.world.pause();
       this.paused = true;
-      this.pauseText.setVisible(true);
-      this.resumeButton.setVisible(true);
-      this.exitButton.setVisible(true);
-      this.pausePanel.setVisible(true);
+      this.pauseUI.show();
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.resumeKey)) {
@@ -403,7 +344,7 @@ export class GameScene extends Phaser.Scene {
 
     // Increase punctuation and update text
     this.score += 1;
-    this.scoreText.setText('Score: ' + this.score);
+    this.scoreText.setText('SCORE: ' + this.score);
 
     // Update record if exceeded
     if (this.score > this.bestScore) {
@@ -457,15 +398,14 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+
   /**
    * Resumes the game from paused state.
    */
   private resumeGame(): void {
     this.physics.world.resume();
     this.paused = false;
-    this.pauseText.setVisible(false);
-    this.resumeButton.setVisible(false);
-    this.exitButton.setVisible(false);
-    this.pausePanel.setVisible(false);
+    this.pauseUI.hide();
   }
+
 }

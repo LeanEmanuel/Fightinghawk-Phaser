@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GameComponent } from '../../game/game.component';
+import { GameComponent } from '../../phaser/game.component';
 
 @Component({
   selector: 'app-game',
