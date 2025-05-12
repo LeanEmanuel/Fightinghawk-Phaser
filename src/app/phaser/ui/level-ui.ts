@@ -11,6 +11,7 @@ export class LevelUI {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
 
+    // Display the level in the top-right corner
     this.text = this.scene.add.text(
       this.scene.scale.width - 20,
       16,
@@ -29,16 +30,25 @@ export class LevelUI {
     return `LEVEL ${this.currentLevel}`;
   }
 
+  /**
+   * Advances to the next level and updates the label.
+   */
   increase(): void {
     this.currentLevel++;
     this.text.setText(this.getLabel());
   }
 
+  /**
+   * Resets the level display to level 1.
+   */
   reset(): void {
     this.currentLevel = 1;
     this.text.setText(this.getLabel());
   }
 
+  /**
+   * Returns the current level number.
+   */
   getLevel(): number {
     return this.currentLevel;
   }

@@ -8,8 +8,6 @@ export class ScoreUI {
   private score: number = 0;
   private bestScore: number = 0;
   private readonly playerName: string;
-
-
   private scoreText: Phaser.GameObjects.Text;
   private highScoreText: Phaser.GameObjects.Text;
 
@@ -19,6 +17,7 @@ export class ScoreUI {
     this.playerName = localStorage.getItem('playerName') || 'Player';
     this.bestScore = parseInt(localStorage.getItem(`highscore_${this.playerName}`) || '0');
 
+    // Current score
     this.scoreText = this.scene.add.text(16, 16, 'SCORE: 0', {
       fontSize: '20px',
       color: '#ff00cc',
@@ -27,6 +26,7 @@ export class ScoreUI {
       strokeThickness: 3
     }).setDepth(10);
 
+    // Best score
     this.highScoreText = this.scene.add.text(16, 44, `HIGH SCORE: ${this.bestScore}`, {
       fontSize: '14px',
       color: '#ffcc00',
@@ -35,6 +35,7 @@ export class ScoreUI {
       strokeThickness: 1
     }).setDepth(10);
 
+    // Player name
     const playerNameText = this.scene.add.text(this.scene.scale.width / 2, 32, this.playerName.toUpperCase(), {
       fontSize: '20px',
       color: '#ffffff',
@@ -47,7 +48,8 @@ export class ScoreUI {
   }
 
   /**
-   * Increases the current score and updates the text.
+   * Increases the current score and updates the display.
+   * Also updates high score if exceeded.
    */
   increase(points: number = 1): void {
     this.score += points;

@@ -39,11 +39,11 @@ export class GameScene extends Phaser.Scene {
   /** Heart icons displayed on the screen */
   private livesUI!: LivesUI;
 
+  /** Level and score UI */
   private levelUI!: LevelUI;
-
-  /** Score and UI */
   private scoreUI!: ScoreUI;
 
+  /** Explosion effects manager */
   private explosionManager!: ExplosionManager;
 
   constructor() {
@@ -109,6 +109,7 @@ export class GameScene extends Phaser.Scene {
     this.livesUI = new LivesUI(this);
     this.livesUI.reset();
 
+    // Score
     this.scoreUI = new ScoreUI(this);
     this.levelUI = new LevelUI(this);
 
@@ -117,22 +118,18 @@ export class GameScene extends Phaser.Scene {
       window.location.href = '/home';
     });
 
-    // Group of bullets
+    // Instantiate managers
     this.bulletManager = new BulletManager(this);
-
-    // Group of enemies
     this.enemyManager = new EnemyManager(this, this.bulletManager);
-
-
     this.explosionManager = new ExplosionManager(this);
 
-    // Collisions
+    // Setup collision handlers
     this.physics.add.overlap(this.bulletManager.getPlayerBullets(), this.enemyManager.getEnemies(), this.destroyEnemy, undefined, this);
     this.physics.add.overlap(this.enemyManager.getEnemies(), this.airplane, this.handlePlayerHit, undefined, this);
     this.physics.add.overlap(this.bulletManager.getEnemyBullets(), this.airplane, this.playerHitByBullet, undefined, this);
 
 
-    // Display pause hint
+    // Pause info label
     this.add.text(10, this.scale.height - 30, 'Press P to pause', {
       fontSize: '12px',
       color: '#ffffff',
@@ -148,7 +145,7 @@ export class GameScene extends Phaser.Scene {
    */
   override update(): void {
 
-    // Pausar
+    // Pause toggle logic
     if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
       this.physics.world.pause();
       this.paused = true;
@@ -162,22 +159,22 @@ export class GameScene extends Phaser.Scene {
 
     if (this.paused) return;
 
+    // Player movement and actions
     this.playerManager.update();
 
     if (this.playerManager.isShooting()) {
       this.shootBullet();
     }
 
-    // Background
+    // Scroll background layers at different speeds for parallax effect
     if (!this.paused) {
       this.background1.tilePositionY -= 0.5; // rápido
       this.background2.tilePositionY -= 0.05; // lento
     }
-
   }
 
   /**
-   * Creates and fires a bullet from the player's current position.
+   * Spawns a new bullet from the player's position.
    */
   private shootBullet(): void {
     this.bulletManager.firePlayerBullet(this.airplane.x, this.airplane.y);
