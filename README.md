@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/assets/img/logo.png" alt="Fightinghawk logo" width="120" />
+<img src="src/assets/img/logo.png" alt="Fightinghawk logo" width="160" />
 
 # 🚀 Fightinghawk
 
