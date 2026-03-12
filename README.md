@@ -2,7 +2,7 @@
 
 <img src="src/assets/img/logo.png" alt="Fightinghawk logo" width="260" />
 
-# 🚀 Fightinghawk
+# 🚀 Fightinghawk 🛸
 
 Arcade shoot 'em up web/mobile construido con Ionic, Angular y Phaser.
 
@@ -109,7 +109,7 @@ npm start
 <div align="center">
   <img alt="Angular" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/angular.png" height="80" />
   <img alt="Ionic" src="https://images.icon-icons.com/2415/PNG/512/ionic_original_logo_icon_146462.png" height="80" />
-  <img alt="Phaser" src="https://icon2.cleanpng.com/20180720/zut/kisspng-phaser-html-game-javascript-typescript-pron-5b51bc5d1d6ad8.2057571715320832931205.jpg" height="80" />
+  <img alt="Phaser" src="https://cdn.phaser.io/images/logo/logo-download.png" height="80" />
   <img alt="TypeScript" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/typescript.png" height="80" />
   <img alt="github" src="https://user-images.githubusercontent.com/25181517/192108374-8da61ba1-99ec-41d7-80b8-fb2f7c0a4948.png" width="80"/>
 </div>
